@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using SocialMediaSimulator.Client.Configuration;
+using SocialMediaSimulator.Client.Services;
 
 namespace SocialMediaSimulator.Client;
 
@@ -18,6 +20,10 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+
+        // Register client services
+        builder.Services.AddSingleton<AppConfig>();
+        builder.Services.AddHttpClient<ApiService>();
 
         return builder.Build();
     }
