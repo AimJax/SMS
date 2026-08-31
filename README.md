@@ -12,8 +12,9 @@
 | 01D | SQLite Foundation | COMPLETE |
 | 01E | Android Client Foundation | COMPLETE |
 | 01F | Foundation Checkpoint | COMPLETE |
+| 02 | Backend Architecture | COMPLETE |
 
-**NEXT: PART 02 — Backend Architecture**
+**NEXT: PART 03 — Persistence**
 
 ## Architecture
 
@@ -22,10 +23,44 @@ Android Client
       ↓
 HTTP REST
       ↓
-ASP.NET Core Server
+API Layer (Controllers, Middleware)
       ↓
-SQLite (EF Core)
+Application Layer (Services, Interfaces)
+      ↓
+Domain Layer (Entities)
+      ↓
+Infrastructure (EF Core / SQLite)
 ```
+
+### Backend Layer Structure
+
+```
+Server/
+├── API/
+│   ├── Controllers/       API endpoints
+│   └── Middleware/        Exception handling
+├── Application/
+│   └── Services/          Business logic interfaces & implementations
+├── Domain/
+│   └── Entities/          Domain models
+├── Infrastructure/
+│   └── Persistence/       EF Core DbContext
+├── Contracts/
+│   ├── Requests/          API request DTOs
+│   └── Responses/         API response DTOs
+├── Extensions/            DI registration extensions
+└── Program.cs
+```
+
+### Layer Responsibilities
+
+| Layer | Responsibility |
+|-------|---------------|
+| **API** | HTTP routing, request handling, error responses |
+| **Application** | Business logic orchestration, service interfaces |
+| **Domain** | Entity definitions, domain rules |
+| **Infrastructure** | Database access, external services |
+| **Contracts** | API request/response DTOs |
 
 ## Technology Stack
 
@@ -38,12 +73,16 @@ SQLite (EF Core)
 
 ```
 ├── Client/               Android application (.NET MAUI)
-│   ├── Configuration/     App configuration (server URL, etc.)
+│   ├── Configuration/    App configuration (server URL)
 │   ├── Models/           Data models
-│   └── Services/          API services (ApiService)
+│   └── Services/         API services (ApiService)
 ├── Server/               ASP.NET Core backend
-│   ├── Data/             EF Core DbContext and entities
-│   └── Services/         Business services
+│   ├── API/              Controllers, middleware
+│   ├── Application/      Service interfaces & implementations
+│   ├── Domain/           Entity definitions
+│   ├── Infrastructure/   Persistence (EF Core)
+│   ├── Contracts/        Request/response DTOs
+│   └── Extensions/       DI registration
 ├── Shared/               Shared contracts and models
 ├── Database/             Database files (sms.db)
 ├── Tests/               Automated tests
@@ -123,15 +162,13 @@ Invoke-RestMethod http://localhost:5225/api/health
 
 | Test | Result |
 |------|--------|
-| Android build | PASS |
-| Android (all targets) build | PASS |
 | Server build | PASS |
 | Server health endpoint | PASS |
-| SQLite persistence (write) | PASS |
-| SQLite persistence (read) | PASS |
-| SQLite persistence (read after restart) | PASS |
-| SQLite CLI verification | PASS |
-| Backend restart/reconnect | PASS |
+| Persistence endpoint (POST) | PASS |
+| Persistence endpoint (GET) | PASS |
+| Persistence after restart | PASS |
+| Exception middleware | PASS |
+| DI service resolution | PASS |
 
 ## License
 

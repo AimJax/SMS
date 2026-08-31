@@ -1,3 +1,3 @@
-namespace SocialMediaSimulator.Server.Services;
+namespace SocialMediaSimulator.Server.Contracts.Requests;
 
 public record CreatePersistenceTestRequest(string Value);

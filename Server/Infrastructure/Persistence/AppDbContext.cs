@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using SocialMediaSimulator.Server.Data.Entities;
+using SocialMediaSimulator.Server.Domain.Entities;
 
-namespace SocialMediaSimulator.Server.Data;
+namespace SocialMediaSimulator.Server.Infrastructure.Persistence;
 
 public class AppDbContext : DbContext
 {

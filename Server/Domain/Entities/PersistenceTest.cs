@@ -1,4 +1,4 @@
-namespace SocialMediaSimulator.Server.Data.Entities;
+namespace SocialMediaSimulator.Server.Domain.Entities;
 
 /// <summary>
 /// Temporary entity for persistence foundation verification.

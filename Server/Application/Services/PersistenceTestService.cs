@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using SocialMediaSimulator.Server.Data;
-using SocialMediaSimulator.Server.Data.Entities;
+using SocialMediaSimulator.Server.Domain.Entities;
+using SocialMediaSimulator.Server.Infrastructure.Persistence;
 
-namespace SocialMediaSimulator.Server.Services;
+namespace SocialMediaSimulator.Server.Application.Services;
 
-public class PersistenceTestService
+public class PersistenceTestService : IPersistenceTestService
 {
     private readonly AppDbContext _context;
 
