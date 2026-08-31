@@ -11,8 +11,9 @@
 | 01C | ASP.NET Core Server | COMPLETE |
 | 01D | SQLite Foundation | COMPLETE |
 | 01E | Android Client Foundation | COMPLETE |
+| 01F | Foundation Checkpoint | COMPLETE |
 
-**NEXT: Foundation Checkpoint**
+**NEXT: PART 02 — Backend Architecture**
 
 ## Architecture
 
@@ -123,11 +124,14 @@ Invoke-RestMethod http://localhost:5225/api/health
 | Test | Result |
 |------|--------|
 | Android build | PASS |
+| Android (all targets) build | PASS |
+| Server build | PASS |
 | Server health endpoint | PASS |
 | SQLite persistence (write) | PASS |
+| SQLite persistence (read) | PASS |
 | SQLite persistence (read after restart) | PASS |
-| Android → Server communication | PASS |
-| Offline handling | PASS |
+| SQLite CLI verification | PASS |
+| Backend restart/reconnect | PASS |
 
 ## License
 
