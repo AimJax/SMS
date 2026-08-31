@@ -1,0 +1,92 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+
+# Visual Studio Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains Rider
+.idea/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResult.xml
+coverage*.xml
+*.trx
+
+# Android Studio / .NET MAUI
+**/Platforms/Android/**/bin/
+**/Platforms/Android/**/obj/
+**/Platforms/Android/**/Resources/
+**/obj/
+**/bin/
+*.apk
+*.aab
+*.dex
+*.class
+*.jar
+*.so
+*.dll
+*.pdb
+*.mdb
+
+# Local SQLite database files (development)
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Secret / credentials (do not accidentally commit these)
+appsettings.*.json
+!appsettings.Template.json
+secrets.json
+*.pem
+*.key
+*.pfx
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Visual Studio
+*.psess
+*.xml
+*.cache
+
+# Rider
+*.DotSettings.user

@@ -1,0 +1,9 @@
+# Database
+
+This directory contains database-related tooling:
+- Schema definitions
+- Migrations
+- Seed data
+- Documentation
+
+Database schema will be added in later checkpoints.
