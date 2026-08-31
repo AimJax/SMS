@@ -51,11 +51,17 @@ coverage*.xml
 *.pdb
 *.mdb
 
-# Local SQLite database files (development)
+# SQLite database files (runtime data)
 *.db
 *.db-shm
 *.db-wal
 *.db-journal
+
+# Keep Database/ folder but not runtime db files
+/Database/*.db
+/Database/*.db-shm
+/Database/*.db-wal
+/Database/*.db-journal
 
 # OS generated files
 .DS_Store
