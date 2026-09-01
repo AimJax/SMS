@@ -7,10 +7,12 @@ namespace SocialMediaSimulator.Server.Application.Services;
 public class PostService : IPostService
 {
     private readonly AppDbContext _context;
+    private readonly INotificationService? _notificationService;
 
-    public PostService(AppDbContext context)
+    public PostService(AppDbContext context, INotificationService? notificationService = null)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     #region Post Operations
@@ -132,6 +134,22 @@ public class PostService : IPostService
         _context.PostLikes.Add(like);
         await _context.SaveChangesAsync();
 
+        // Create notification (fire-and-forget pattern for non-blocking notification creation)
+        if (_notificationService != null)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _notificationService.NotifyLikeAsync(like.Id, accountId, post.AuthorAccountId, post.Id);
+                }
+                catch
+                {
+                    // Notification service already logs failures internally; swallow exception
+                }
+            });
+        }
+
         return like;
     }
 
@@ -225,6 +243,22 @@ public class PostService : IPostService
 
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
+
+        // Create notification (fire-and-forget pattern for non-blocking notification creation)
+        if (_notificationService != null)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _notificationService.NotifyCommentAsync(comment.Id, authorAccountId, post.AuthorAccountId, post.Id);
+                }
+                catch
+                {
+                    // Notification service already logs failures internally; swallow exception
+                }
+            });
+        }
 
         return comment;
     }

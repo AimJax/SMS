@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<NpcInterest> NpcInterests => Set<NpcInterest>();
     public DbSet<NpcAction> NpcActions => Set<NpcAction>();
     public DbSet<AiProviderConfig> AiProviderConfigs => Set<AiProviderConfig>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,6 +55,37 @@ public class AppDbContext : DbContext
             entity.Property(e => e.ApiKey).IsRequired().HasMaxLength(500);
             entity.Property(e => e.BaseUrl).HasMaxLength(500);
             entity.HasIndex(e => e.Provider).IsUnique();
+        });
+        
+        // Apply Notification configuration
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("Notifications");
+            entity.HasKey(e => e.Id);
+            
+            // Indexes for efficient queries
+            // Feed query: get notifications for recipient ordered by time
+            entity.HasIndex(e => new { e.RecipientAccountId, e.CreatedAt })
+                .IsDescending(false, true);
+            
+            // Unread count: count unread notifications for recipient
+            entity.HasIndex(e => new { e.RecipientAccountId, e.IsRead });
+            
+            // Navigation property configurations
+            entity.HasOne(e => e.RecipientAccount)
+                .WithMany()
+                .HasForeignKey(e => e.RecipientAccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(e => e.ActorAccount)
+                .WithMany()
+                .HasForeignKey(e => e.ActorAccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(e => e.RelatedPost)
+                .WithMany()
+                .HasForeignKey(e => e.RelatedPostId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

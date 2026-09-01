@@ -7,10 +7,12 @@ namespace SocialMediaSimulator.Server.Application.Services;
 public class SocialGraphService : ISocialGraphService
 {
     private readonly AppDbContext _context;
+    private readonly INotificationService? _notificationService;
 
-    public SocialGraphService(AppDbContext context)
+    public SocialGraphService(AppDbContext context, INotificationService? notificationService = null)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     #region Follow Operations
@@ -74,6 +76,22 @@ public class SocialGraphService : ISocialGraphService
 
         _context.Follows.Add(follow);
         await _context.SaveChangesAsync();
+
+        // Create notification (fire-and-forget pattern for non-blocking notification creation)
+        if (_notificationService != null)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _notificationService.NotifyFollowAsync(follow.Id, followerAccountId, followedAccountId);
+                }
+                catch
+                {
+                    // Notification service already logs failures internally; swallow exception
+                }
+            });
+        }
 
         return follow;
     }
