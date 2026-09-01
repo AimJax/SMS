@@ -1,0 +1,12 @@
+{
+    "ollama": {
+        "baseUrl": "http://localhost:11434/v1",
+        "model": "qwen3:4b",
+        "apiKey": "eb83536349244577bc482f76d21bc55f.JFqxh_kUnppKPlpmBsDZBMeG",
+        "timeoutSeconds": 60
+    },
+    "notes": {
+        "apiKeyStatus": "Valid - authenticates successfully",
+        "recommendation": "Ollama local typically does not require API key authentication. The key works but qwen3:4b may behave differently with auth headers."
+    }
+}
