@@ -285,14 +285,17 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.CauseEventId);
             entity.HasIndex(e => e.AccountId);
             
+            // Use EventId (Guid) to reference Event.EventId (Guid), not Event.Id (int)
             entity.HasOne(e => e.Event)
                 .WithMany()
                 .HasForeignKey(e => e.EventId)
+                .HasPrincipalKey(ev => ev.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
             
             entity.HasOne(e => e.CauseEvent)
                 .WithMany()
                 .HasForeignKey(e => e.CauseEventId)
+                .HasPrincipalKey(ev => ev.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         

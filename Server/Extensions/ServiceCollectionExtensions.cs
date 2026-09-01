@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
         var feedScoringConfig = new FeedScoringConfig();
         configuration.GetSection("FeedScoring").Bind(feedScoringConfig);
         services.AddSingleton(feedScoringConfig);
-        services.AddSingleton<IFeedScoringService, FeedScoringService>();
+        services.AddScoped<IFeedScoringService, FeedScoringService>();
         services.AddScoped<IFeedCacheService, FeedCacheService>();
         
         // Register notification service
@@ -129,6 +129,13 @@ public static class ServiceCollectionExtensions
             var logger = sp.GetRequiredService<ILogger<AiContentGeneratorService>>();
             var simulationState = sp.GetService<ISimulationStateService>();
             return new AiContentGeneratorService(aiService, templateGenerator, promptBuilder, logger, simulationState);
+        });
+        
+        // Register IAiTextGenerationService factory for services that need it directly
+        services.AddScoped<IAiTextGenerationService>(sp =>
+        {
+            var aiProvider = sp.GetRequiredService<IAiProviderService>();
+            return aiProvider.GetTextGenerationService();
         });
         
         // Register behavior configuration
