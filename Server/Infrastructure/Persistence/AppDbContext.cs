@@ -36,6 +36,12 @@ public class AppDbContext : DbContext
     public DbSet<OfflineSimulationResult> OfflineSimulationResults => Set<OfflineSimulationResult>();
     public DbSet<PostVirality> PostVirality => Set<PostVirality>();
     public DbSet<ViralityTransition> ViralityTransitions => Set<ViralityTransition>();
+    public DbSet<Topic> Topics => Set<Topic>();
+    public DbSet<Hashtag> Hashtags => Set<Hashtag>();
+    public DbSet<Trend> Trends => Set<Trend>();
+    public DbSet<TrendPropagation> TrendPropagations => Set<TrendPropagation>();
+    public DbSet<TopicSubscription> TopicSubscriptions => Set<TopicSubscription>();
+    public DbSet<AppSetting> AppSettings => Set<AppSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -380,6 +386,141 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Topic entity configuration
+        modelBuilder.Entity<Topic>(entity =>
+        {
+            entity.ToTable("Topics");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.TopicId).IsRequired();
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.DisplayName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Slug).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Category).IsRequired();
+            entity.Property(e => e.IsVerified).IsRequired();
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.Name).IsUnique();
+            entity.HasIndex(e => e.Slug).IsUnique();
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.IsActive);
+        });
+        
+        // Hashtag entity configuration
+        modelBuilder.Entity<Hashtag>(entity =>
+        {
+            entity.ToTable("Hashtags");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.HashtagId).IsRequired();
+            entity.Property(e => e.Tag).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.NormalizedTag).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.IsTrending).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.Tag).IsUnique();
+            entity.HasIndex(e => e.NormalizedTag).IsUnique();
+            entity.HasIndex(e => e.IsTrending);
+            entity.HasIndex(e => e.TodayUsageCount);
+            
+            entity.HasOne(e => e.Topic)
+                .WithMany(t => t.Hashtags)
+                .HasForeignKey(e => e.TopicId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+        
+        // Trend entity configuration
+        modelBuilder.Entity<Trend>(entity =>
+        {
+            entity.ToTable("Trends");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.TrendId).IsRequired();
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Query).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.DisplayName).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Slug).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Strength).IsRequired();
+            entity.Property(e => e.Scope).IsRequired();
+            entity.Property(e => e.CalculatedAt).IsRequired();
+            entity.Property(e => e.ExpiresAt).IsRequired();
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.Query);
+            entity.HasIndex(e => e.Scope);
+            entity.HasIndex(e => e.Strength);
+            entity.HasIndex(e => e.Rank);
+            entity.HasIndex(e => e.ExpiresAt);
+            entity.HasIndex(e => e.IsActive);
+            
+            entity.HasOne(e => e.Topic)
+                .WithMany()
+                .HasForeignKey(e => e.TopicId)
+                .OnDelete(DeleteBehavior.SetNull);
+                
+            entity.HasOne(e => e.Hashtag)
+                .WithMany()
+                .HasForeignKey(e => e.HashtagId)
+                .OnDelete(DeleteBehavior.SetNull);
+                
+            entity.HasOne(e => e.Community)
+                .WithMany()
+                .HasForeignKey(e => e.CommunityId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+        
+        // TrendPropagation entity configuration
+        modelBuilder.Entity<TrendPropagation>(entity =>
+        {
+            entity.ToTable("TrendPropagations");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.PropagationId).IsRequired();
+            entity.Property(e => e.TrendId).IsRequired();
+            entity.Property(e => e.FromCommunityId).IsRequired();
+            entity.Property(e => e.ToCommunityId).IsRequired();
+            entity.Property(e => e.PropagatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.TrendId);
+        });
+        
+        // TopicSubscription entity configuration
+        modelBuilder.Entity<TopicSubscription>(entity =>
+        {
+            entity.ToTable("TopicSubscriptions");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.SubscribedAt).IsRequired();
+            
+            entity.HasIndex(e => new { e.AccountId, e.TopicId }).IsUnique();
+        });
+        
+        // AppSetting entity configuration
+        modelBuilder.Entity<AppSetting>(entity =>
+        {
+            entity.ToTable("AppSettings");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Key).IsRequired().HasMaxLength(200);
+            
+            entity.HasIndex(e => e.Key).IsUnique();
         });
     }
 }

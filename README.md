@@ -30,8 +30,9 @@
 | 17 | LLM-Driven Event System | COMPLETE |
 | 18 | Event Causality & Offline Simulation | COMPLETE |
 | 19 | Virality & Trending | COMPLETE |
+| 20 | Topics & Trends | COMPLETE |
 
-**NEXT: PART 20 — Topics & Trends**
+**NEXT: PART 21 — Rumors & Misinformation**
 
 ## Architecture
 
@@ -537,6 +538,213 @@ ViralityProcessingService runs as a background service:
 ### Database Tables
 - **PostVirality**: Tracks virality metrics per post
 - **ViralityTransition**: Logs state transitions
+
+## Topics & Trends System (Part 20)
+
+The Topics & Trends system connects viral content into social phenomena where multiple people discuss the same thing at the same time. Trends are foundational to rumors, news coverage, echo chambers, and content discovery.
+
+### Topic Entity
+Topics categorize posts and enable trend tracking:
+
+```csharp
+Topic {
+    TopicId (Guid)     // Stable identifier
+    Name               // "technology", "gaming"
+    DisplayName        // "Technology", "Gaming"
+    Slug               // URL-safe version
+    Category           // Gaming, Technology, Sports, etc.
+    PostCount          // Total posts ever
+    ActivePostCount    // Posts in last 7 days
+    SubscriberCount    // Users following topic
+    IsVerified         // Official topic
+}
+```
+
+### Topic Categories
+- General, Entertainment, Gaming, Technology, Sports, Politics, News, Lifestyle, Art, Meme, Community, Event, Hashtag
+
+### Pre-defined Topics
+The system seeds 39 topics across categories:
+- **Entertainment**: movies, tv, music, celebrities, anime, books
+- **Gaming**: gaming, esports, pcgaming, mobilegaming, nintendoswitch, playstation, xbox
+- **Technology**: technology, programming, ai, gadgets, smartphones, science
+- **Sports**: sports, basketball, soccer, football, tennis
+- **Lifestyle**: fashion, food, travel, fitness, photography, art
+- **Meme**: memes, shitposting, wholesome, cringe
+- **News/Politics**: news, politics, worldnews
+
+### Hashtag Management
+Hashtags are extracted from post content and tracked:
+
+```csharp
+Hashtag {
+    HashtagId (Guid)
+    Tag              // "#Gaming"
+    NormalizedTag    // "gaming"
+    TopicId          // Associated topic (nullable)
+    UsageCount       // Total times used
+    TodayUsageCount  // Used today
+    IsTrending       // Currently trending
+    TrendingSince    // When started trending
+    TrendingRank     // Current rank (1 = most)
+}
+```
+
+### Hashtag Extraction
+```csharp
+// Extracts #hashtags from content
+ExtractHashtagsAsync("Check out #Gaming and #AI!") → ["gaming", "ai"]
+```
+
+### Hashtag → Topic Mapping
+- Exact match: "ai" → AI topic
+- Partial match: "nintendoswitch" → nintendoswitch topic
+- No match: remains standalone hashtag
+
+### Trend Entity
+```csharp
+Trend {
+    TrendId (Guid)
+    Type              // Topic, Hashtag, Event, Search, Viral
+    TopicId           // Associated topic
+    HashtagId         // Associated hashtag
+    Query             // Search query
+    DisplayName       // "Gaming", "#Gaming"
+    Slug              // URL-safe
+    
+    // Metrics
+    Strength          // Emerging, Growing, Hot, Viral, Peaking
+    PostCount         // Posts in window
+    UniquePosters     // Unique accounts
+    EngagementTotal   // Total engagement
+    Velocity          // Growth rate (posts/hour)
+    Rank              // Position in trend list
+    
+    Scope             // Global, Community, Personal
+    CommunityId       // If community-specific
+    CalculatedAt      // When calculated
+    PeakedAt          // When reached max
+    ExpiresAt         // When expires
+}
+```
+
+### Trend Strength Formula
+```
+Strength = weighted_avg(countScore, posterScore, velocityScore)
+- CountScore: <10→0, <50→1, <200→2, <500→3, <1000→4, 1000+→5
+- PosterScore: <5→0, <20→1, <50→2, <100→3, <200→4, 200+→5
+- VelocityScore: <0.5→0, <1→1, <2→2, <5→3, <10→4, 10+→5
+- Weights: count 40%, posters 30%, velocity 30%
+```
+
+### Trend Types
+1. **Global Trends**: Spans entire network
+2. **Community Trends**: Specific to a community
+3. **Personal Trends**: Personalized to user's interests
+
+### Trend Calculation
+```csharp
+CalculateTrendAsync(query, scope) {
+    window = 24 hours
+    posts = GetPostsMentioning(query, window)
+    
+    postCount = posts.Count
+    uniquePosters = posts.Select(p => p.AuthorId).Distinct().Count
+    engagement = posts.Sum(p => p.Likes + p.Comments)
+    velocity = CalculateVelocity(posts, 24h)
+    strength = CalculateStrength(postCount, uniquePosters, velocity)
+    
+    return Trend { postCount, uniquePosters, engagement, velocity, strength }
+}
+```
+
+### Velocity Calculation
+Uses linear regression on hourly post counts:
+```csharp
+// Groups posts by hour, calculates trend line slope
+// Higher positive slope = faster growth
+```
+
+### Cross-Community Propagation
+Trends spread between communities based on:
+- Base probability: 10%
+- Engagement boost: up to 30%
+- Strength boost: up to 20%
+- Shared members boost: up to 30%
+
+### Trend Service
+```csharp
+ITrendService {
+    // Topics
+    GetTopicBySlugAsync(slug) → Topic
+    GetAllTopicsAsync() → List<Topic>
+    CreateTopicAsync(name, category) → Topic
+    
+    // Hashtags
+    GetTrendingHashtagsAsync(count) → List<Hashtag>
+    GetOrCreateHashtagAsync(tag) → Hashtag
+    ExtractHashtagsAsync(content) → List<string>
+    
+    // Trends
+    GetGlobalTrendsAsync(count) → List<Trend>
+    GetCommunityTrendsAsync(communityId, count) → List<Trend>
+    GetPersonalTrendsAsync(accountId, count) → List<Trend>
+    CalculateTrendAsync(query, scope) → Trend
+    ProcessTrendsTickAsync() → void
+    
+    // Subscriptions
+    SubscribeToTopicAsync(accountId, topicId)
+    UnsubscribeToTopicAsync(accountId, topicId)
+}
+```
+
+### Background Processing
+TrendProcessingService runs every 15 minutes:
+1. Reset daily hashtag counts
+2. Process new hashtags from recent posts
+3. Calculate global trends
+4. Update trend rankings
+5. Process cross-community propagation
+6. Expire old trends
+
+### API Endpoints
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/trends` | GET | No | Get global trends |
+| `/api/trends/{id}` | GET | No | Get specific trend |
+| `/api/communities/{id}/trends` | GET | No | Community trends |
+| `/api/me/trends` | GET | Yes | Personal trends |
+| `/api/hashtags/trending` | GET | No | Trending hashtags |
+| `/api/hashtags/{tag}` | GET | No | Hashtag details |
+| `/api/topics` | GET | No | All topics |
+| `/api/topics/search` | GET | No | Search topics |
+| `/api/topics/{slug}` | GET | No | Topic details |
+| `/api/topics/{slug}/posts` | GET | No | Posts for topic |
+| `/api/topics/{id}/subscribe` | POST | Yes | Subscribe |
+| `/api/topics/{id}/subscribe` | DELETE | Yes | Unsubscribe |
+| `/api/trends/calculate` | POST | No | Manual calculation |
+| `/api/trends/process` | POST | No | Trigger processing |
+
+### Database Tables
+- **Topics**: Topic definitions
+- **Hashtags**: Tracked hashtags with usage stats
+- **Trends**: Active trends with metrics
+- **TrendPropagations**: Cross-community spread records
+- **TopicSubscriptions**: User topic subscriptions
+
+### Configuration
+```json
+"Trends": {
+  "Enabled": true,
+  "ProcessingIntervalMinutes": 15,
+  "TrendWindowHours": 24,
+  "MinPostsForTrend": 10,
+  "MaxTrendingHashtags": 20,
+  "TrendDurationHours": 24,
+  "PropagationMultiplier": 1.0,
+  "TopicPostCountDays": 7
+}
+```
 
 ## NPC Simulation Architecture
 

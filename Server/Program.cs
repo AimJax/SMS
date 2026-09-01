@@ -89,5 +89,20 @@ app.MapEventEndpoints();
 app.MapCausalityEndpoints();
 app.MapOfflineEndpoints();
 app.MapViralityEndpoints();
+app.MapTrendEndpoints();
+
+// Seed topics on startup
+using (var scope = app.Services.CreateScope())
+{
+    var topicSeedService = scope.ServiceProvider.GetRequiredService<ITopicSeedService>();
+    if (!await topicSeedService.TopicsExistAsync())
+    {
+        var result = await topicSeedService.SeedTopicsAsync();
+        if (result.Success)
+        {
+            Console.WriteLine($"Seeded {result.TopicsCreated} topics.");
+        }
+    }
+}
 
 app.Run();

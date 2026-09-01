@@ -24,4 +24,8 @@ public interface IPostService
     // Engagement counts
     Task<int> GetLikeCountAsync(Guid postId);
     Task<int> GetCommentCountAsync(Guid postId);
+    
+    // Topic-based post queries
+    Task<(IEnumerable<Post> Items, string? NextCursor)> GetPostsByTopicAsync(string topic, string? cursor = null, int pageSize = 20);
+    Task<IEnumerable<Post>> GetRecentPostsAsync(DateTime since, int limit = 100);
 }

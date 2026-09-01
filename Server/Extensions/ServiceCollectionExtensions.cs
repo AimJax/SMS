@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         // Register community service
         services.AddScoped<ICommunityService, CommunityService>();
         services.AddScoped<ICommunitySeedService, CommunitySeedService>();
+        services.AddScoped<ITopicSeedService, TopicSeedService>();
         
         // Register event services
         services.AddScoped<IEventService, EventService>();
@@ -71,6 +72,24 @@ public static class ServiceCollectionExtensions
         
         // Register virality background processing service
         services.AddHostedService<ViralityProcessingService>();
+        
+        // Register trend configuration
+        var trendConfig = new TrendConfig
+        {
+            Enabled = configuration.GetValue<bool>("Trends:Enabled", true),
+            ProcessingIntervalMinutes = configuration.GetValue<int>("Trends:ProcessingIntervalMinutes", 15),
+            TrendWindowHours = configuration.GetValue<int>("Trends:TrendWindowHours", 24),
+            MinPostsForTrend = configuration.GetValue<int>("Trends:MinPostsForTrend", 10),
+            MaxTrendingHashtags = configuration.GetValue<int>("Trends:MaxTrendingHashtags", 20),
+            TrendDurationHours = configuration.GetValue<int>("Trends:TrendDurationHours", 24),
+            PropagationMultiplier = configuration.GetValue<double>("Trends:PropagationMultiplier", 1.0),
+            TopicPostCountDays = configuration.GetValue<int>("Trends:TopicPostCountDays", 7)
+        };
+        services.AddSingleton(trendConfig);
+        services.AddScoped<ITrendService, TrendService>();
+        
+        // Register trend background processing service
+        services.AddHostedService<TrendProcessingService>();
         
         // Register offline simulation configuration
         var offlineConfig = new OfflineSimulationConfig

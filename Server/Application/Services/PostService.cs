@@ -325,6 +325,48 @@ public class PostService : IPostService
         return await _context.Comments.CountAsync(c => c.PostId == post.Id && c.Status == CommentStatus.Active);
     }
 
+    public async Task<(IEnumerable<Post> Items, string? NextCursor)> GetPostsByTopicAsync(string topic, string? cursor = null, int pageSize = 20)
+    {
+        var query = _context.Posts
+            .Include(p => p.AuthorAccount)
+                .ThenInclude(a => a.Profile)
+            .Where(p => p.Topic != null && p.Topic.ToLower() == topic.ToLower() && p.Status != PostStatus.Deleted)
+            .OrderByDescending(p => p.CreatedAt);
+
+        // Apply cursor if provided
+        if (!string.IsNullOrEmpty(cursor))
+        {
+            if (Guid.TryParse(cursor, out var cursorGuid))
+            {
+                var cursorPost = await _context.Posts.FirstOrDefaultAsync(p => p.PostId == cursorGuid);
+                if (cursorPost != null)
+                {
+                    query = (IOrderedQueryable<Post>)query.Where(p => p.CreatedAt < cursorPost.CreatedAt || (p.CreatedAt == cursorPost.CreatedAt && p.Id < cursorPost.Id));
+                }
+            }
+        }
+
+        var items = await query.Take(pageSize + 1).ToListAsync();
+        
+        string? nextCursor = null;
+        if (items.Count > pageSize)
+        {
+            items = items.Take(pageSize).ToList();
+            nextCursor = items.Last().PostId.ToString();
+        }
+
+        return (items, nextCursor);
+    }
+
+    public async Task<IEnumerable<Post>> GetRecentPostsAsync(DateTime since, int limit = 100)
+    {
+        return await _context.Posts
+            .Where(p => p.CreatedAt > since && p.Status != PostStatus.Deleted)
+            .OrderByDescending(p => p.CreatedAt)
+            .Take(limit)
+            .ToListAsync();
+    }
+
     #endregion
 
     #region Comment Queries

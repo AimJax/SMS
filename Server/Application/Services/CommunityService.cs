@@ -39,6 +39,14 @@ public class CommunityService : ICommunityService
             .FirstOrDefaultAsync(c => c.CommunityId == communityId && c.IsActive);
     }
 
+    public async Task<Community?> GetByIdAsync(int communityId)
+    {
+        return await _context.Communities
+            .Include(c => c.OwnerAccount)
+                .ThenInclude(a => a!.Profile)
+            .FirstOrDefaultAsync(c => c.Id == communityId && c.IsActive);
+    }
+
     public async Task<(IEnumerable<Community> Items, string? NextCursor)> GetPublicCommunitiesAsync(
         string? cursor = null, 
         int pageSize = DefaultPageSize,
@@ -450,6 +458,51 @@ public class CommunityService : ICommunityService
                 m.CommunityId == communityId && 
                 m.AccountId == accountId && 
                 m.IsActive);
+    }
+
+    public async Task<IEnumerable<Community>> GetAllActiveAsync()
+    {
+        return await _context.Communities
+            .Where(c => c.IsActive)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Community>> GetConnectedCommunitiesAsync(int communityId)
+    {
+        // Find communities that share members with this community
+        var community = await _context.Communities.FindAsync(communityId);
+        if (community == null)
+        {
+            return Enumerable.Empty<Community>();
+        }
+
+        // Get member IDs of this community
+        var memberIds = await _context.CommunityMemberships
+            .Where(m => m.CommunityId == communityId && m.IsActive)
+            .Select(m => m.AccountId)
+            .ToListAsync();
+
+        // Include owner
+        memberIds.Add(community.OwnerAccountId);
+
+        // Find other communities with overlapping members
+        var connectedCommunityIds = await _context.CommunityMemberships
+            .Where(m => memberIds.Contains(m.AccountId) && m.CommunityId != communityId && m.IsActive)
+            .Select(m => m.CommunityId)
+            .Distinct()
+            .ToListAsync();
+
+        // Add communities whose owners are members
+        var ownerCommunities = await _context.Communities
+            .Where(c => memberIds.Contains(c.OwnerAccountId) && c.Id != communityId && c.IsActive)
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        connectedCommunityIds.AddRange(ownerCommunities);
+
+        return await _context.Communities
+            .Where(c => connectedCommunityIds.Contains(c.Id) && c.IsActive)
+            .ToListAsync();
     }
 
     private static string GenerateSlug(string name)

@@ -1,4 +1,4 @@
-﻿using SocialMediaSimulator.Server.Domain.Entities;
+using SocialMediaSimulator.Server.Domain.Entities;
 
 namespace SocialMediaSimulator.Server.Application.Services;
 
@@ -10,6 +10,7 @@ public interface ICommunityService
     // Community CRUD
     Task<Community?> GetBySlugAsync(string slug);
     Task<Community?> GetByIdAsync(Guid communityId);
+    Task<Community?> GetByIdAsync(int communityId);
     Task<(IEnumerable<Community> Items, string? NextCursor)> GetPublicCommunitiesAsync(string? cursor = null, int pageSize = 20, string? sortBy = null);
     Task<(IEnumerable<Community> Items, string? NextCursor)> SearchCommunitiesAsync(string? query, string? topic, string? cursor = null, int pageSize = 20);
     Task<IEnumerable<Community>> GetByTopicAsync(string topic, int limit = 20);
@@ -31,4 +32,8 @@ public interface ICommunityService
     // Membership queries for NPC behavior
     Task<IEnumerable<Community>> GetRelevantCommunitiesForNpcAsync(IEnumerable<string> interests, int limit = 10);
     Task<bool> IsMemberAsync(int accountId, int communityId);
+    
+    // Trend propagation support
+    Task<IEnumerable<Community>> GetAllActiveAsync();
+    Task<IEnumerable<Community>> GetConnectedCommunitiesAsync(int communityId);
 }
