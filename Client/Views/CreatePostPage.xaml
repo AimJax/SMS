@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SocialMediaSimulator.Client.Views.CreatePostPage"
+             Title="New Post">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Post" Clicked="OnPostClicked" IsEnabled="{Binding CanPost}"/>
+    </ContentPage.ToolbarItems>
+
+    <VerticalStackLayout Padding="15" Spacing="15">
+        <Editor x:Name="ContentEditor" 
+                Placeholder="What's happening?" 
+                HeightRequest="150"
+                TextChanged="OnContentChanged"/>
+
+        <HorizontalStackLayout Spacing="10">
+            <Label Text="Topic (optional):" VerticalOptions="Center"/>
+            <Entry Placeholder="e.g. #gaming" Text="{Binding Topic}" WidthRequest="200"/>
+        </HorizontalStackLayout>
+
+        <Label Text="{Binding CharCount, StringFormat='{0}/280'}" 
+               HorizontalOptions="End" FontSize="12" TextColor="Gray"/>
+
+        <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="12"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"/>
+
+        <ActivityIndicator IsRunning="{Binding IsPosting}" HorizontalOptions="Center"/>
+    </VerticalStackLayout>
+</ContentPage>

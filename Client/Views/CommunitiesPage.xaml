@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SocialMediaSimulator.Client.Views.CommunitiesPage"
+             Title="Communities">
+    <Grid>
+        <!-- Communities List -->
+        <RefreshView IsRefreshing="{Binding IsLoading}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Communities}" SelectionMode="Single">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="10,5" Padding="15" BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="16"/>
+                                    <Label Text="{Binding Description}" MaxLines="2" LineBreakMode="TailTruncation" FontSize="12"/>
+                                    <Label Text="{Binding MemberCount, StringFormat='{0} members'}" FontSize="11" TextColor="Gray"/>
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="{Binding IsJoined, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Joined|Join'}"
+                                        Command="{Binding Source={RelativeSource AncestorType=CollectionView}, Path=BindingContext.JoinLeaveCommand}"
+                                        CommandParameter="{Binding}"
+                                        VerticalOptions="Center"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <ActivityIndicator IsRunning="{Binding IsLoading}" HorizontalOptions="Center" VerticalOptions="Center"/>
+    </Grid>
+</ContentPage>

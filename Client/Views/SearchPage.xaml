@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SocialMediaSimulator.Client.Views.SearchPage"
+             Title="Search">
+    <VerticalStackLayout Padding="15">
+        <SearchBar Placeholder="Search accounts and posts..."
+                   Text="{Binding SearchQuery}"
+                   SearchCommand="{Binding SearchCommand}"/>
+
+        <!-- Trends Section -->
+        <Label Text="Trending" FontSize="18" FontAttributes="Bold" Margin="0,15,0,5"
+               IsVisible="{Binding HasSearched, Converter={StaticResource InverseBoolConverter}}"/>
+        
+        <CollectionView ItemsSource="{Binding Trends}" HeightRequest="100"
+                        IsVisible="{Binding HasSearched, Converter={StaticResource InverseBoolConverter}}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="5" Padding="10" BackgroundColor="{StaticResource Primary}" CornerRadius="10">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding DisplayName}" FontAttributes="Bold" TextColor="White"/>
+                            <Label Text="{Binding PostCount, StringFormat='{}{0} posts'}" FontSize="11" TextColor="#CCFFFFFF"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Search Results -->
+        <Label Text="Accounts" FontSize="18" FontAttributes="Bold" Margin="0,15,0,5"
+               IsVisible="{Binding HasSearched}"/>
+        <CollectionView ItemsSource="{Binding Accounts}" HeightRequest="80"
+                        IsVisible="{Binding HasSearched}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <HorizontalStackLayout Margin="0,5">
+                        <Frame WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="0">
+                            <BoxView BackgroundColor="{StaticResource Primary}"/>
+                        </Frame>
+                        <VerticalStackLayout Margin="10,0">
+                            <Label Text="{Binding Profile.DisplayName}" FontAttributes="Bold"/>
+                            <Label Text="{Binding Username, StringFormat='@{0}'}" FontSize="12" TextColor="Gray"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Label Text="Posts" FontSize="18" FontAttributes="Bold" Margin="0,15,0,5"
+               IsVisible="{Binding HasSearched}"/>
+        <CollectionView ItemsSource="{Binding Posts}"
+                        IsVisible="{Binding HasSearched}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5" Padding="10" BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding AuthorDisplayName}" FontAttributes="Bold"/>
+                            <Label Text="{Binding Content}" MaxLines="2" LineBreakMode="TailTruncation"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <ActivityIndicator IsRunning="{Binding IsSearching}" HorizontalOptions="Center" Margin="0,20"/>
+    </VerticalStackLayout>
+</ContentPage>

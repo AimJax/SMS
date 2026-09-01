@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       x:Class="SocialMediaSimulator.Client.Views.MainShell"
+       xmlns:views="clr-namespace:SocialMediaSimulator.Client.Views">
+    
+    <TabBar>
+        <Tab Title="Home" Icon="home">
+            <ShellContent ContentTemplate="{DataTemplate views:FeedPage}"/>
+        </Tab>
+        <Tab Title="Search" Icon="search">
+            <ShellContent ContentTemplate="{DataTemplate views:SearchPage}"/>
+        </Tab>
+        <Tab Title="Communities" Icon="group">
+            <ShellContent ContentTemplate="{DataTemplate views:CommunitiesPage}"/>
+        </Tab>
+        <Tab Title="Notifications" Icon="notifications">
+            <ShellContent ContentTemplate="{DataTemplate views:NotificationsPage}"/>
+        </Tab>
+        <Tab Title="Profile" Icon="person">
+            <ShellContent ContentTemplate="{DataTemplate views:ProfilePage}"/>
+        </Tab>
+    </TabBar>
+</Shell>

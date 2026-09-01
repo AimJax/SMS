@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SocialMediaSimulator.Client.Views.FeedPage"
+             Title="Home">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="search" Command="{Binding NavigateToSearchCommand}"/>
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Posts}" 
+                            SelectionMode="None"
+                            ItemSizingStrategy="MeasureFirstItem">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="10,5" Padding="15" BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+                            <VerticalStackLayout Spacing="10">
+                                <!-- Author Header -->
+                                <HorizontalStackLayout Spacing="10">
+                                    <Frame WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="0">
+                                        <BoxView BackgroundColor="{StaticResource Primary}"/>
+                                    </Frame>
+                                    <VerticalStackLayout>
+                                        <Label Text="{Binding AuthorDisplayName}" FontAttributes="Bold" FontSize="14"/>
+                                        <Label Text="{Binding AuthorUsername}" FontSize="12" TextColor="Gray"/>
+                                    </VerticalStackLayout>
+                                    <Label Text="{Binding CreatedAt, StringFormat='{}{0:MMM d, HH:mm}'}" 
+                                           FontSize="11" TextColor="Gray" HorizontalOptions="EndAndExpand"/>
+                                </HorizontalStackLayout>
+
+                                <!-- Content -->
+                                <Label Text="{Binding Content}" FontSize="15" LineBreakMode="WordWrap"/>
+
+                                <!-- Topic -->
+                                <Label Text="{Binding Topic}" FontSize="12" TextColor="{StaticResource Primary}"
+                                       IsVisible="{Binding Topic, Converter={StaticResource StringToBoolConverter}}"/>
+
+                                <!-- Actions -->
+                                <HorizontalStackLayout Spacing="20">
+                                    <Button Text="{Binding LikeCount, StringFormat='♥ {0}'}" 
+                                            Command="{Binding Source={RelativeSource AncestorType=CollectionView}, Path=BindingContext.LikePostCommand}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ActionButtonStyle}"/>
+                                    <Button Text="{Binding CommentCount, StringFormat='💬 {0}'}"
+                                            Command="{Binding Source={RelativeSource AncestorType=CollectionView}, Path=BindingContext.CommentPostCommand}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ActionButtonStyle}"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <Button Text="+" Command="{Binding CreatePostCommand}" 
+                Style="{StaticResource FabStyle}"
+                HorizontalOptions="End" VerticalOptions="End"
+                Margin="20"/>
+
+        <ActivityIndicator IsRunning="{Binding IsLoading}" HorizontalOptions="Center" VerticalOptions="Center"/>
+    </Grid>
+</ContentPage>
