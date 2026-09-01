@@ -49,6 +49,29 @@ public static class ServiceCollectionExtensions
         // Register causal tracking service
         services.AddScoped<ICausalTrackingService, CausalTrackingService>();
         
+        // Register virality configuration
+        var viralityConfig = new ViralityConfig
+        {
+            Enabled = configuration.GetValue<bool>("Virality:Enabled", true),
+            TrendingThreshold = configuration.GetValue<int>("Virality:TrendingThreshold", 50),
+            PopularThreshold = configuration.GetValue<int>("Virality:PopularThreshold", 200),
+            ViralThreshold = configuration.GetValue<int>("Virality:ViralThreshold", 1000),
+            MassivelyViralThreshold = configuration.GetValue<int>("Virality:MassivelyViralThreshold", 10000),
+            ViralVelocityMin = configuration.GetValue<float>("Virality:ViralVelocityMin", 10),
+            ViralWindowHours = configuration.GetValue<int>("Virality:ViralWindowHours", 24),
+            ProcessingIntervalMinutes = configuration.GetValue<int>("Virality:ProcessingIntervalMinutes", 5),
+            MaxPostsPerTick = configuration.GetValue<int>("Virality:MaxPostsPerTick", 100),
+            ActivePostDays = configuration.GetValue<int>("Virality:ActivePostDays", 7),
+            DeclineVelocityDropPercent = configuration.GetValue<float>("Virality:DeclineVelocityDropPercent", 0.7f),
+            BaseFollowerGainOnViral = configuration.GetValue<int>("Virality:BaseFollowerGainOnViral", 10),
+            BaseFameGainOnViral = configuration.GetValue<float>("Virality:BaseFameGainOnViral", 5.0f)
+        };
+        services.AddSingleton(viralityConfig);
+        services.AddScoped<IViralityService, ViralityService>();
+        
+        // Register virality background processing service
+        services.AddHostedService<ViralityProcessingService>();
+        
         // Register offline simulation configuration
         var offlineConfig = new OfflineSimulationConfig
         {

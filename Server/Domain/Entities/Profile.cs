@@ -28,6 +28,16 @@ public class Profile
     public string? AvatarUrl { get; set; }
     
     /// <summary>
+    /// Follower count (cached for performance)
+    /// </summary>
+    public int FollowerCount { get; set; }
+    
+    /// <summary>
+    /// Fame level (0-100, affects feed visibility)
+    /// </summary>
+    public float FameLevel { get; set; }
+    
+    /// <summary>
     /// When the profile was created
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

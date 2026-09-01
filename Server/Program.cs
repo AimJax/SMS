@@ -88,5 +88,6 @@ app.MapCommunityEndpoints();
 app.MapEventEndpoints();
 app.MapCausalityEndpoints();
 app.MapOfflineEndpoints();
+app.MapViralityEndpoints();
 
 app.Run();

@@ -29,8 +29,9 @@
 | 16 | Advanced Feed | COMPLETE |
 | 17 | LLM-Driven Event System | COMPLETE |
 | 18 | Event Causality & Offline Simulation | COMPLETE |
+| 19 | Virality & Trending | COMPLETE |
 
-**NEXT: PART 19 — Virality & Trending**
+**NEXT: PART 20 — Topics & Trends**
 
 ## Architecture
 
@@ -442,6 +443,100 @@ IOfflineSimulationService
 ### Database Tables
 - **CausalChain**: Tracks cause-effect relationships
 - **OfflineSimulationResult**: Persists simulation results
+
+## Virality System (Part 19)
+
+The virality system enables posts to achieve organic viral spread through the social network. Posts that cross engagement thresholds become "viral" and trigger consequences for their authors.
+
+### Virality States
+Posts progress through these virality states based on engagement:
+
+| State | Engagement Threshold | Velocity Required | Description |
+|-------|---------------------|-------------------|-------------|
+| Normal | < 50 | No | Standard post |
+| Trending | ≥ 50 | No | Gaining traction |
+| Popular | ≥ 200 | No | Above average |
+| Viral | ≥ 1000 | ≥ 10/hr | Crossed viral threshold |
+| MassivelyViral | ≥ 10000 | Yes | Extremely viral |
+| Declining | (was viral) | (velocity dropped 70%) | Cooling down |
+
+### Virality Score Formula
+```
+Score = EngagementScore (0-30) + VelocityScore (0-30) + ReachScore (0-20) + RelativeScore (0-20)
+- EngagementScore: log10(totalEngagement + 1) * 10, capped at 30
+- VelocityScore: velocity * 3, capped at 30
+- ReachScore: log10(reach + 1) * 5, capped at 20
+- RelativeScore: (engagement/followers) * 100, capped at 20
+```
+
+### Virality Metrics
+- **TotalEngagement**: Likes + Comments + Reposts
+- **Velocity**: Engagements per hour (within 24-hour window)
+- **Reach**: Estimated unique viewers
+- **PeakVelocity**: Highest velocity reached during post lifetime
+- **ControversyLevel**: 0-10 score from LLM analysis
+
+### Viral Consequences
+When a post goes viral, the system applies:
+
+1. **Follower Gain**: Base 10 + (engagement/50), multiplied by viral state
+2. **Fame Gain**: Base 5 + (engagement/200), multiplied by viral state
+3. **Viral Event**: Creates a ViralPost event for the event system
+4. **Notification**: Alerts the author of their viral success
+
+### Virality Service
+```csharp
+IViralityService
+  CalculateViralityAsync(postId)     // Calculate metrics for a post
+  GetViralityStateAsync(postId)      // Get current state
+  GetPostViralityAsync(postId)       // Get full virality data
+  GetViralPostsAsync(count, minState) // Get posts by virality level
+  GetTrendingPostsAsync(count, topic) // Get trending posts
+  TrackEngagementAsync(postId)        // Quick update after new engagement
+  CheckThresholdsAsync(postId)        // Check for state transitions
+  AnalyzeControversyAsync(postId)     // LLM controversy analysis
+```
+
+### Background Processing
+ViralityProcessingService runs as a background service:
+- Processes every 5 minutes (configurable)
+- Processes up to 100 posts per tick
+- Active posts tracked for 7 days
+- Automatically marks declining posts
+
+### Configuration
+```json
+"Virality": {
+  "Enabled": true,
+  "TrendingThreshold": 50,
+  "PopularThreshold": 200,
+  "ViralThreshold": 1000,
+  "MassivelyViralThreshold": 10000,
+  "ViralVelocityMin": 10,
+  "ViralWindowHours": 24,
+  "ProcessingIntervalMinutes": 5,
+  "MaxPostsPerTick": 100,
+  "ActivePostDays": 7,
+  "DeclineVelocityDropPercent": 0.7,
+  "BaseFollowerGainOnViral": 10,
+  "BaseFameGainOnViral": 5.0
+}
+```
+
+### API Endpoints
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/posts/viral` | GET | No | Get viral posts |
+| `/api/posts/trending` | GET | No | Get trending posts |
+| `/api/posts/{id}/virality` | GET | No | Get virality details |
+| `/api/posts/{id}/virality-state` | GET | No | Get virality state |
+| `/api/posts/{id}/virality-history` | GET | No | Get state transitions |
+| `/api/posts/{id}/calculate-virality` | POST | No | Trigger calculation |
+| `/api/posts/{id}/analyze-controversy` | POST | No | LLM controversy analysis |
+
+### Database Tables
+- **PostVirality**: Tracks virality metrics per post
+- **ViralityTransition**: Logs state transitions
 
 ## NPC Simulation Architecture
 

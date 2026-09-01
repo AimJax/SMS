@@ -29,4 +29,5 @@ public interface ISocialGraphService
     // Counts
     Task<int> GetFollowerCountAsync(int accountId);
     Task<int> GetFollowingCountAsync(int accountId);
+    Task<int> GetFollowerCountAsync(Guid accountId);
 }

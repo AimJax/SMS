@@ -33,4 +33,14 @@ public interface IAccountService
     /// Check if username is available
     /// </summary>
     Task<bool> IsUsernameAvailableAsync(string username);
+    
+    /// <summary>
+    /// Adjust follower count for an account
+    /// </summary>
+    Task AdjustFollowerCountAsync(int accountId, int delta, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Adjust fame level for an account
+    /// </summary>
+    Task AdjustFameLevelAsync(int accountId, float delta, CancellationToken cancellationToken = default);
 }

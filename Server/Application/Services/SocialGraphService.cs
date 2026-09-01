@@ -347,5 +347,12 @@ public class SocialGraphService : ISocialGraphService
         return await _context.Follows.CountAsync(f => f.FollowerAccountId == accountId);
     }
 
+    public async Task<int> GetFollowerCountAsync(Guid accountId)
+    {
+        var account = await _context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId);
+        if (account == null) return 0;
+        return await GetFollowerCountAsync(account.Id);
+    }
+
     #endregion
 }

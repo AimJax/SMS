@@ -34,6 +34,8 @@ public class AppDbContext : DbContext
     public DbSet<EventConsequence> EventConsequences => Set<EventConsequence>();
     public DbSet<CausalChain> CausalChains => Set<CausalChain>();
     public DbSet<OfflineSimulationResult> OfflineSimulationResults => Set<OfflineSimulationResult>();
+    public DbSet<PostVirality> PostVirality => Set<PostVirality>();
+    public DbSet<ViralityTransition> ViralityTransitions => Set<ViralityTransition>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -315,6 +317,69 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.ParentEventId);
             entity.HasIndex(e => e.TriggerEventId);
             entity.HasIndex(e => e.EventChainId);
+        });
+        
+        // PostVirality entity configuration
+        modelBuilder.Entity<PostVirality>(entity =>
+        {
+            entity.ToTable("PostVirality");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.PostViralityId).IsRequired();
+            entity.Property(e => e.PostId).IsRequired();
+            entity.Property(e => e.State).IsRequired();
+            entity.Property(e => e.Score).IsRequired();
+            entity.Property(e => e.TotalEngagement).IsRequired();
+            entity.Property(e => e.Velocity).IsRequired();
+            entity.Property(e => e.PeakVelocity).IsRequired();
+            entity.Property(e => e.Reach).IsRequired();
+            entity.Property(e => e.ShareCount).IsRequired();
+            entity.Property(e => e.ControversyLevel).IsRequired();
+            entity.Property(e => e.HasControversyAnalysis).IsRequired();
+            entity.Property(e => e.LastUpdated).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            // Indexes
+            entity.HasIndex(e => e.PostId).IsUnique();
+            entity.HasIndex(e => e.State);
+            entity.HasIndex(e => e.Score);
+            entity.HasIndex(e => e.Velocity);
+            entity.HasIndex(e => e.LastUpdated);
+            
+            entity.HasOne(e => e.Post)
+                .WithMany()
+                .HasForeignKey(e => e.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // ViralityTransition entity configuration
+        modelBuilder.Entity<ViralityTransition>(entity =>
+        {
+            entity.ToTable("ViralityTransition");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.TransitionId).IsRequired();
+            entity.Property(e => e.PostId).IsRequired();
+            entity.Property(e => e.FromState).IsRequired();
+            entity.Property(e => e.ToState).IsRequired();
+            entity.Property(e => e.ScoreAtTransition).IsRequired();
+            entity.Property(e => e.EngagementAtTransition).IsRequired();
+            entity.Property(e => e.VelocityAtTransition).IsRequired();
+            entity.Property(e => e.TransitionedAt).IsRequired();
+            
+            // Indexes
+            entity.HasIndex(e => e.PostId);
+            entity.HasIndex(e => e.TransitionedAt);
+            entity.HasIndex(e => new { e.PostId, e.TransitionedAt });
+            
+            entity.HasOne(e => e.Post)
+                .WithMany()
+                .HasForeignKey(e => e.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

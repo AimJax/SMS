@@ -145,6 +145,34 @@ public class AccountService : IAccountService
             .AnyAsync(a => a.UsernameNormalized == normalizedUsername);
     }
 
+    public async Task AdjustFollowerCountAsync(int accountId, int delta, CancellationToken cancellationToken = default)
+    {
+        var account = await _context.Accounts
+            .Include(a => a.Profile)
+            .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
+        
+        if (account?.Profile != null)
+        {
+            account.Profile.FollowerCount = Math.Max(0, account.Profile.FollowerCount + delta);
+            account.Profile.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    public async Task AdjustFameLevelAsync(int accountId, float delta, CancellationToken cancellationToken = default)
+    {
+        var account = await _context.Accounts
+            .Include(a => a.Profile)
+            .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
+        
+        if (account?.Profile != null)
+        {
+            account.Profile.FameLevel = Math.Max(0, account.Profile.FameLevel + delta);
+            account.Profile.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
     private static string HashPassword(string password)
     {
         // Using PBKDF2 with SHA256

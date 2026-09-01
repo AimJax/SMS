@@ -54,4 +54,9 @@ public interface INotificationService
     /// Gets a notification by ID (for ownership verification).
     /// </summary>
     Task<Notification?> GetByIdAsync(Guid notificationId);
+    
+    /// <summary>
+    /// Creates a notification with specified content.
+    /// </summary>
+    Task CreateNotificationAsync(Notification notification);
 }

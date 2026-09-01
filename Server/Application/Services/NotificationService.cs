@@ -119,6 +119,7 @@ public class NotificationService : INotificationService
                 Type = NotificationType.Like,
                 RelatedEntityId = postLikeId,
                 RelatedPostId = postId,
+                RelatedPostGuid = null,
                 CreatedAt = DateTime.UtcNow,
                 IsRead = false
             };
@@ -173,6 +174,7 @@ public class NotificationService : INotificationService
                 Type = NotificationType.Comment,
                 RelatedEntityId = commentId,
                 RelatedPostId = postId,
+                RelatedPostGuid = null,
                 CreatedAt = DateTime.UtcNow,
                 IsRead = false
             };
@@ -305,6 +307,26 @@ public class NotificationService : INotificationService
                 .ThenInclude(a => a!.Profile)
             .Include(n => n.RelatedPost)
             .FirstOrDefaultAsync(n => n.Id == notificationId);
+    }
+
+    public async Task CreateNotificationAsync(Notification notification)
+    {
+        try
+        {
+            // Ensure required fields
+            notification.CreatedAt = DateTime.UtcNow;
+            notification.IsRead = false;
+            
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+            
+            _logger.LogDebug("Created notification: Type={Type}, Recipient={Recipient}, PostId={PostId}",
+                notification.Type, notification.RecipientAccountId, notification.RelatedPostId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create notification. Error: {Error}", ex.Message);
+        }
     }
 
     #region Private Helper Methods
