@@ -45,6 +45,9 @@ public class AppDbContext : DbContext
     public DbSet<Rumor> Rumors => Set<Rumor>();
     public DbSet<AccountBelief> AccountBeliefs => Set<AccountBelief>();
     public DbSet<RumorEvidence> RumorEvidence => Set<RumorEvidence>();
+    public DbSet<NewsAccount> NewsAccounts => Set<NewsAccount>();
+    public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
+    public DbSet<NewsExposure> NewsExposures => Set<NewsExposure>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -632,6 +635,86 @@ public class AppDbContext : DbContext
                 .WithMany(r => r.Evidence)
                 .HasForeignKey(e => e.RumorId)
                 .HasPrincipalKey(r => r.RumorId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // NewsAccount entity configuration
+        modelBuilder.Entity<NewsAccount>(entity =>
+        {
+            entity.ToTable("NewsAccounts");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.NewsAccountId).IsRequired();
+            entity.Property(e => e.AccountId).IsRequired();
+            entity.Property(e => e.NewsName).IsRequired();
+            entity.Property(e => e.Category).IsRequired();
+            entity.Property(e => e.Tone).IsRequired();
+            entity.Property(e => e.CredibilityScore).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.NewsAccountId).IsUnique();
+            entity.HasIndex(e => e.AccountId).IsUnique();
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.IsActive);
+        });
+        
+        // NewsArticle entity configuration
+        modelBuilder.Entity<NewsArticle>(entity =>
+        {
+            entity.ToTable("NewsArticles");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.ArticleId).IsRequired();
+            entity.Property(e => e.NewsAccountId).IsRequired();
+            entity.Property(e => e.Headline).IsRequired();
+            entity.Property(e => e.Category).IsRequired();
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Status).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.ArticleId).IsUnique();
+            entity.HasIndex(e => e.NewsAccountId);
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.PublishedAt);
+            entity.HasIndex(e => e.IsBreakingNews);
+            entity.HasIndex(e => e.Status);
+            
+            // Use Guid NewsAccountId to reference NewsAccount.NewsAccountId
+            entity.HasOne(e => e.NewsAccount)
+                .WithMany(n => n.Articles)
+                .HasForeignKey(e => e.NewsAccountId)
+                .HasPrincipalKey(n => n.NewsAccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // NewsExposure entity configuration
+        modelBuilder.Entity<NewsExposure>(entity =>
+        {
+            entity.ToTable("NewsExposures");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.ExposureId).IsRequired();
+            entity.Property(e => e.ArticleId).IsRequired();
+            entity.Property(e => e.CommunityId).IsRequired();
+            entity.Property(e => e.ExposedAt).IsRequired();
+            
+            entity.HasIndex(e => e.ExposureId).IsUnique();
+            entity.HasIndex(e => e.ArticleId);
+            entity.HasIndex(e => e.CommunityId);
+            
+            // Use Guid ArticleId to reference NewsArticle.ArticleId
+            entity.HasOne(e => e.Article)
+                .WithMany(a => a.Exposures)
+                .HasForeignKey(e => e.ArticleId)
+                .HasPrincipalKey(a => a.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

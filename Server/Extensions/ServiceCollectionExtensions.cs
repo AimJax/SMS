@@ -3,6 +3,7 @@ using SocialMediaSimulator.Server.Application.Models;
 using SocialMediaSimulator.Server.Application.Services;
 using SocialMediaSimulator.Server.Infrastructure;
 using SocialMediaSimulator.Server.Infrastructure.Persistence;
+using SocialMediaSimulator.Server.Infrastructure.Seeders;
 
 namespace SocialMediaSimulator.Server.Extensions;
 
@@ -43,6 +44,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICommunitySeedService, CommunitySeedService>();
         services.AddScoped<ITopicSeedService, TopicSeedService>();
         services.AddScoped<AiConfigSeederService>();
+        services.AddScoped<NewsAccountSeeder>();
         
         // Register event services
         services.AddScoped<IEventService, EventService>();
@@ -207,6 +209,19 @@ public static class ServiceCollectionExtensions
         };
         services.AddSingleton(rumorConfig);
         services.AddScoped<IRumorService, RumorService>();
+        
+        // Register news configuration
+        var newsConfig = new NewsConfig
+        {
+            Enabled = configuration.GetValue<bool>("News:Enabled", true),
+            ProcessingIntervalMinutes = configuration.GetValue<int>("News:ProcessingIntervalMinutes", 30),
+            MaxArticlesPerTick = configuration.GetValue<int>("News:MaxArticlesPerTick", 10),
+            MinPriorityForBreaking = configuration.GetValue<int>("News:MinPriorityForBreaking", 80),
+            ArticleExpirationDays = configuration.GetValue<int>("News:ArticleExpirationDays", 365)
+        };
+        services.AddSingleton(newsConfig);
+        services.AddScoped<INewsService, NewsService>();
+        services.AddHostedService<NewsProcessingService>();
 
         // Register hosted background service
         services.AddHostedService<NpcSimulationHostedService>();

@@ -31,10 +31,11 @@
 | 18 | Event Causality & Offline Simulation | COMPLETE |
 | 19 | Virality & Trending | COMPLETE |
 | 20 | Topics & Trends | COMPLETE |
-| 21 | Deployment & Testing | COMPLETE |
-| 22 | Rumors & Misinformation | COMPLETE |
+| 21 | Rumors & Misinformation | COMPLETE |
+| 22 | Deployment & Testing | COMPLETE |
+| 23 | News System | COMPLETE |
 
-**NEXT: PART 23 — Permanent Memory**
+**NEXT: PART 24 — Android UI Implementation**
 
 ## Getting Started
 

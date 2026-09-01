@@ -5,6 +5,7 @@ using SocialMediaSimulator.Server.API.Controllers;
 using SocialMediaSimulator.Server.API.Middleware;
 using SocialMediaSimulator.Server.Extensions;
 using SocialMediaSimulator.Server.Infrastructure.Persistence;
+using SocialMediaSimulator.Server.Infrastructure.Seeders;
 using SocialMediaSimulator.Server.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,6 +72,10 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine($"Seeded {result.TopicsCreated} topics.");
         }
     }
+    
+    // Seed news accounts
+    var newsSeeder = scope.ServiceProvider.GetRequiredService<NewsAccountSeeder>();
+    await newsSeeder.SeedIfNeededAsync(dbContext);
 }
 
 // Configure the HTTP request pipeline
@@ -106,5 +111,6 @@ app.MapOfflineEndpoints();
 app.MapViralityEndpoints();
 app.MapTrendEndpoints();
 app.MapRumorEndpoints();
+app.MapNewsEndpoints();
 
 app.Run();
