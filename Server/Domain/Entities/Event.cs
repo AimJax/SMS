@@ -230,6 +230,26 @@ public class Event
     public int NarrativeArcLength { get; set; } = 1;
     
     /// <summary>
+    /// Parent event this emerged from (null for root events)
+    /// </summary>
+    public Guid? ParentEventId { get; set; }
+    
+    /// <summary>
+    /// The specific trigger event that started this event chain
+    /// </summary>
+    public Guid? TriggerEventId { get; set; }
+    
+    /// <summary>
+    /// Groups related events in a causal chain
+    /// </summary>
+    public Guid? EventChainId { get; set; }
+    
+    /// <summary>
+    /// Position in the event chain (0 for root)
+    /// </summary>
+    public int ChainDepth { get; set; }
+    
+    /// <summary>
     /// Soft delete flag
     /// </summary>
     public bool IsDeleted { get; set; }

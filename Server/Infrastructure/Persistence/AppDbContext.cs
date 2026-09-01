@@ -32,6 +32,8 @@ public class AppDbContext : DbContext
     public DbSet<Event> Events => Set<Event>();
     public DbSet<EventParticipation> EventParticipations => Set<EventParticipation>();
     public DbSet<EventConsequence> EventConsequences => Set<EventConsequence>();
+    public DbSet<CausalChain> CausalChains => Set<CausalChain>();
+    public DbSet<OfflineSimulationResult> OfflineSimulationResults => Set<OfflineSimulationResult>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -259,6 +261,60 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Apply CausalChain configuration
+        modelBuilder.Entity<CausalChain>(entity =>
+        {
+            entity.ToTable("CausalChain");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.CauseDescription).IsRequired();
+            entity.Property(e => e.Metadata).HasColumnType("TEXT");
+            
+            // Indexes for efficient queries
+            entity.HasIndex(e => e.EventId);
+            entity.HasIndex(e => e.CauseEventId);
+            entity.HasIndex(e => e.AccountId);
+            
+            entity.HasOne(e => e.Event)
+                .WithMany()
+                .HasForeignKey(e => e.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(e => e.CauseEvent)
+                .WithMany()
+                .HasForeignKey(e => e.CauseEventId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Apply OfflineSimulationResult configuration
+        modelBuilder.Entity<OfflineSimulationResult>(entity =>
+        {
+            entity.ToTable("OfflineSimulationResults");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.Duration).HasConversion<string>();
+            entity.Property(e => e.EventsSummaryJson).HasColumnType("TEXT");
+            entity.Property(e => e.CatchupSummary).IsRequired();
+            
+            // Indexes for efficient queries
+            entity.HasIndex(e => e.AccountId);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => new { e.AccountId, e.IsAcknowledged });
+            
+            entity.HasOne(e => e.Account)
+                .WithMany()
+                .HasForeignKey(e => e.AccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Add Event indexes for parent-child relationships
+        modelBuilder.Entity<Event>(entity =>
+        {
+            entity.HasIndex(e => e.ParentEventId);
+            entity.HasIndex(e => e.TriggerEventId);
+            entity.HasIndex(e => e.EventChainId);
         });
     }
 }

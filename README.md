@@ -28,8 +28,9 @@
 | 15 | Communities | COMPLETE |
 | 16 | Advanced Feed | COMPLETE |
 | 17 | LLM-Driven Event System | COMPLETE |
+| 18 | Event Causality & Offline Simulation | COMPLETE |
 
-**NEXT: PART 18 — Event Causality & Offline Simulation**
+**NEXT: PART 19 — Virality & Trending**
 
 ## Architecture
 
@@ -345,6 +346,102 @@ Event Execution (consequences applied)
 | `/api/events/{id}` | GET | No | Event details with participants |
 | `/api/events/{id}/participants` | GET | No | Event participant list |
 | `/api/accounts/{id}/events` | GET | Yes | User's events |
+
+## Event Causality (Part 18)
+
+### Overview
+The Event Causality system tracks why events happen by establishing formal causal chains between events. This creates a coherent narrative where the world feels interconnected rather than a series of disconnected incidents.
+
+### Causal Chain Entity
+Records causal relationships between events:
+- **CauseType**: Direct, Indirect, Contributing, Trigger
+- **CauseStrength**: 0.0-1.0 contribution factor
+- **CauseDescription**: Human-readable explanation
+- **Metadata**: JSON for additional context
+
+### Event Chain Relationships
+- **ParentEventId**: The event this emerged from
+- **TriggerEventId**: The specific event that started the chain
+- **EventChainId**: Groups related events together
+- **ChainDepth**: Position in the chain (0 = root)
+
+### Causal Tracking Service
+```csharp
+ICausalTrackingService
+  RecordCausalLinkAsync()     // Record a cause-effect relationship
+  GetCausalChainAsync()        // Get causes of an event
+  GetEventChainAsync()         // Get all related events in chain
+  GetRootCauseAsync()          // Find the original cause
+  GetDownstreamEventsAsync()   // Find events caused by this one
+  GenerateCausalNarrativeAsync() // LLM-generated story
+```
+
+### API Endpoints
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/events/{id}/chain` | GET | No | Get causal chain |
+| `/api/events/{id}/event-chain` | GET | No | Get event chain |
+| `/api/events/{id}/root-cause` | GET | No | Get root cause |
+| `/api/events/{id}/downstream` | GET | No | Get downstream events |
+| `/api/events/{id}/narrative` | GET | No | Generate narrative |
+
+## Offline World Simulation (Part 18)
+
+### Overview
+The Offline Simulation system ensures the world continues running when players are away. When players return, they receive a catch-up summary of what happened.
+
+### Time Compression Strategy
+- **TicksPerHour**: 10 (configurable)
+- **MaxTicksPerSession**: 1000 (cap for performance)
+- **MinTicksToSimulate**: 5 (minimum even for short offline)
+- For a 12-hour offline period: 120 compressed ticks
+
+### Offline NPC Simulation
+- Predicts NPC behavior using personality profiles
+- Aggregates actions rather than simulating tick-by-tick
+- Deterministic results using account-seeded random
+- Generates posts, follower changes, and events
+
+### Offline Simulation Service
+```csharp
+IOfflineSimulationService
+  GetOfflineDurationAsync()    // Calculate time away
+  ShouldRunOfflineSimulationAsync() // Check if simulation needed
+  RunOfflineSimulationAsync()  // Run simulation and return summary
+  GetCatchupSummaryAsync()     // Get latest summary
+  AcknowledgeCatchupAsync()   // Mark as seen
+  HasUnreadCatchupAsync()     // Check for new catchup
+```
+
+### Catchup Summary
+- Duration of offline period
+- Follower changes (gained/lost)
+- Posts created during offline
+- Major events that occurred
+- LLM-generated narrative summary
+
+### Configuration
+```json
+"OfflineSimulation": {
+  "Enabled": true,
+  "MinOfflineHoursBeforeSimulation": 1,
+  "TicksPerHour": 10,
+  "MaxTicksPerSession": 1000,
+  "EventProbabilityMultiplier": 0.5
+}
+```
+
+### API Endpoints
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/catchup` | GET | Yes | Get catchup summary |
+| `/api/catchup/acknowledge` | POST | Yes | Mark as seen |
+| `/api/catchup/has-unread` | GET | Yes | Check for unread |
+| `/api/catchup/duration` | GET | No | Get offline duration |
+
+### Database Tables
+- **CausalChain**: Tracks cause-effect relationships
+- **OfflineSimulationResult**: Persists simulation results
 
 ## NPC Simulation Architecture
 

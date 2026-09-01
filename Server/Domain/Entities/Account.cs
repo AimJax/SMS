@@ -76,6 +76,11 @@ public class Account
     /// </summary>
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
+    /// <summary>
+    /// When the account was last active (for offline detection)
+    /// </summary>
+    public DateTime? LastSeenAt { get; set; }
+    
     // Navigation properties
     public Profile? Profile { get; set; }
     public ICollection<AccountHistory> History { get; set; } = new List<AccountHistory>();

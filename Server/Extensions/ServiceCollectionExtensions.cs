@@ -46,6 +46,22 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IEventGenerationService, EventGenerationService>();
         
+        // Register causal tracking service
+        services.AddScoped<ICausalTrackingService, CausalTrackingService>();
+        
+        // Register offline simulation configuration
+        var offlineConfig = new OfflineSimulationConfig
+        {
+            Enabled = configuration.GetValue<bool>("OfflineSimulation:Enabled", true),
+            MinOfflineHoursBeforeSimulation = configuration.GetValue<int>("OfflineSimulation:MinOfflineHoursBeforeSimulation", 1),
+            TicksPerHour = configuration.GetValue<int>("OfflineSimulation:TicksPerHour", 10),
+            MaxTicksPerSession = configuration.GetValue<int>("OfflineSimulation:MaxTicksPerSession", 1000),
+            MinTicksToSimulate = configuration.GetValue<int>("OfflineSimulation:MinTicksToSimulate", 5),
+            EventProbabilityMultiplier = configuration.GetValue<double>("OfflineSimulation:EventProbabilityMultiplier", 0.5)
+        };
+        services.AddSingleton(offlineConfig);
+        services.AddScoped<IOfflineSimulationService, OfflineSimulationService>();
+        
         // Register NPC services
         services.AddScoped<INpcService, NpcService>();
         services.AddScoped<INpcSimulationService, NpcSimulationService>();

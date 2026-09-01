@@ -86,5 +86,7 @@ app.MapAiEndpoints();
 app.MapNotificationEndpoints();
 app.MapCommunityEndpoints();
 app.MapEventEndpoints();
+app.MapCausalityEndpoints();
+app.MapOfflineEndpoints();
 
 app.Run();
