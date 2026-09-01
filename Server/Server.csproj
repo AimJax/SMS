@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>SocialMediaSimulator.Server</RootNamespace>
+    <!-- Suppress nullable reference warnings from EF Core navigation properties -->
+    <NoWarn>CS8602;CS8603;CS8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
