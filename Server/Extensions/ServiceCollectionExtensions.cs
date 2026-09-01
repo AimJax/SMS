@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMediaSimulator.Server.Application.Models;
 using SocialMediaSimulator.Server.Application.Services;
+using SocialMediaSimulator.Server.Infrastructure;
 using SocialMediaSimulator.Server.Infrastructure.Persistence;
 
 namespace SocialMediaSimulator.Server.Extensions;
@@ -54,6 +55,31 @@ public static class ServiceCollectionExtensions
             EnableExploration = true,
             ExplorationRate = 0.3
         });
+
+        // Register simulation configuration
+        var simulationEnabled = configuration.GetValue<bool>("Simulation:Enabled", true);
+        var tickInterval = configuration.GetValue<int>("Simulation:TickIntervalSeconds", 10);
+        var maxNpcsPerTick = configuration.GetValue<int>("Simulation:MaxNpcsPerTick", 100);
+        
+        // Validate tick interval
+        if (tickInterval < SimulationConfig.MinTickIntervalSeconds)
+            tickInterval = SimulationConfig.MinTickIntervalSeconds;
+        if (tickInterval > SimulationConfig.MaxTickIntervalSeconds)
+            tickInterval = SimulationConfig.MaxTickIntervalSeconds;
+        
+        services.AddSingleton(new SimulationConfig
+        {
+            Enabled = simulationEnabled,
+            TickIntervalSeconds = tickInterval,
+            MaxNpcsPerTick = maxNpcsPerTick,
+            DetailedLogging = configuration.GetValue<bool>("Simulation:DetailedLogging", false)
+        });
+
+        // Register simulation state service (singleton for state sharing)
+        services.AddSingleton<ISimulationStateService, SimulationStateService>();
+
+        // Register hosted background service
+        services.AddHostedService<NpcSimulationHostedService>();
 
         return services;
     }

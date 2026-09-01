@@ -21,8 +21,9 @@
 | 08 | NPC Simulator Foundation | COMPLETE |
 | 09 | NPC Population Generation | COMPLETE |
 | 10 | NPC Behavior Simulation | COMPLETE |
+| 11 | NPC Background Simulation | COMPLETE |
 
-**NEXT: PART 11 — NPC BACKGROUND SIMULATION**
+**NEXT: PART 12 — NPC Social Graph**
 
 ## Architecture
 
@@ -631,9 +632,102 @@ All NPC actions are recorded in `NpcAction`:
 ### Intentionally Not Implemented
 
 - **LLM Integration** — Ollama/Qwen NPC content generation (future part)
-- **NPC-Specific API** — Admin endpoints for NPC management
-- **Background Processing** — Hosted service for tick execution
-- **Social Graph for NPCs** — NPC follows, relationships
+- **NPC-Specific API** — Full admin NPC management CRUD endpoints (future part)
+- **NPC Social Graph** — NPC-to-NPC follows/relationships
+- **Android Simulation UI** — Client-side simulation control
+
+## NPC Background Simulation
+
+### Overview
+The NPC simulation runs automatically in the background as a hosted service. NPCs are continuously processed without requiring external triggers or client requests.
+
+### Background Service Architecture
+```
+Server Startup
+      ↓
+NpcSimulationHostedService.StartAsync()
+      ↓
+Continuously: Check CanStartTick → Execute Tick → Wait Interval
+      ↓
+Server Shutdown
+      ↓
+NpcSimulationHostedService.StopAsync() (graceful)
+```
+
+### Configuration
+```json
+{
+  "Simulation": {
+    "Enabled": true,
+    "TickIntervalSeconds": 10,
+    "MaxNpcsPerTick": 100,
+    "DetailedLogging": false
+  }
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Enabled | true | Enable/disable background simulation |
+| TickIntervalSeconds | 10 | Time between ticks (1-3600 seconds) |
+| MaxNpcsPerTick | 100 | Max NPCs processed per tick |
+| DetailedLogging | false | Enable per-NPC logging |
+
+### Overlap Prevention
+- Ticks are atomic — a new tick cannot start while a previous one is running
+- If a tick takes longer than the interval, the next scheduled tick is skipped
+- Skipped ticks are tracked in statistics
+
+### Failure Isolation
+- Individual tick failures are caught and logged
+- The service continues scheduling subsequent ticks
+- A single bad NPC does not crash the simulation
+
+### Graceful Shutdown
+1. Service observes CancellationToken
+2. If a tick is in progress, waits up to 30 seconds for completion
+3. After timeout, proceeds with shutdown (no half-written state)
+4. Server exits cleanly
+
+### State Management
+- SimulationStateService tracks: running/paused state, tick counts, last tick time, durations
+- State is in-memory (resets on server restart)
+- State persists across ticks within a server session
+
+### Admin Endpoints
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/admin/simulation/status` | GET | Yes | Get simulation status |
+| `/api/admin/simulation/pause` | POST | Yes | Pause simulation |
+| `/api/admin/simulation/resume` | POST | Yes | Resume simulation |
+
+#### Status Response
+```json
+{
+  "isRunning": true,
+  "isPaused": false,
+  "isEnabled": true,
+  "tickIntervalSeconds": 10,
+  "maxNpcsPerTick": 100,
+  "totalTicks": 42,
+  "totalNpcsProcessed": 1260,
+  "totalTicksSkipped": 2,
+  "totalTicksFailed": 0,
+  "lastTickAt": "2024-01-15T10:30:00Z",
+  "lastTickDurationMs": 150.5,
+  "lastTickNpcsProcessed": 30,
+  "serviceStartedAt": "2024-01-15T08:00:00Z",
+  "isTickInProgress": false,
+  "currentTickStartedAt": null
+}
+```
+
+### API Responsiveness
+- The background service uses scoped DbContext per tick
+- Each tick processes NPCs independently
+- API requests are not blocked by simulation ticks
+- Connection pool is properly managed with short-lived scopes
 
 ### Persistence Test
 | Endpoint | Method | Auth | Description |
@@ -973,6 +1067,12 @@ $feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSi
 | NPC action recording | PASS |
 | NPC candidate generation | PASS |
 | NPC 100 NPC processing performance | PASS |
+| Simulation state service initialization | PASS |
+| Simulation pause/resume | PASS |
+| Simulation overlap prevention | PASS |
+| Simulation tick lifecycle | PASS |
+| Simulation failure isolation | PASS |
+| Simulation disabled state | PASS |
 
 ## License
 
