@@ -357,9 +357,11 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.Velocity);
             entity.HasIndex(e => e.LastUpdated);
             
+            // Use Guid PostId to reference Post.PostId (not Post.Id)
             entity.HasOne(e => e.Post)
                 .WithMany()
                 .HasForeignKey(e => e.PostId)
+                .HasPrincipalKey(p => p.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         
@@ -385,9 +387,11 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.TransitionedAt);
             entity.HasIndex(e => new { e.PostId, e.TransitionedAt });
             
+            // Use Guid PostId to reference Post.PostId (not Post.Id)
             entity.HasOne(e => e.Post)
                 .WithMany()
                 .HasForeignKey(e => e.PostId)
+                .HasPrincipalKey(p => p.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         
@@ -436,9 +440,11 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.IsTrending);
             entity.HasIndex(e => e.TodayUsageCount);
             
+            // Use Guid TopicId to reference Topic.TopicId (not Topic.Id)
             entity.HasOne(e => e.Topic)
                 .WithMany(t => t.Hashtags)
                 .HasForeignKey(e => e.TopicId)
+                .HasPrincipalKey(t => t.TopicId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
         
@@ -469,16 +475,20 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.ExpiresAt);
             entity.HasIndex(e => e.IsActive);
             
+            // Use Guid TopicId to reference Topic.TopicId (not Topic.Id)
             entity.HasOne(e => e.Topic)
                 .WithMany()
                 .HasForeignKey(e => e.TopicId)
+                .HasPrincipalKey(t => t.TopicId)
                 .OnDelete(DeleteBehavior.SetNull);
-                
+            
+            // Use Guid HashtagId to reference Hashtag.HashtagId (not Hashtag.Id)
             entity.HasOne(e => e.Hashtag)
                 .WithMany()
                 .HasForeignKey(e => e.HashtagId)
+                .HasPrincipalKey(h => h.HashtagId)
                 .OnDelete(DeleteBehavior.SetNull);
-                
+            
             entity.HasOne(e => e.Community)
                 .WithMany()
                 .HasForeignKey(e => e.CommunityId)
@@ -498,6 +508,13 @@ public class AppDbContext : DbContext
             entity.Property(e => e.FromCommunityId).IsRequired();
             entity.Property(e => e.ToCommunityId).IsRequired();
             entity.Property(e => e.PropagatedAt).IsRequired();
+            
+            // Use Guid TrendId to reference Trend.TrendId (not Trend.Id)
+            entity.HasOne(e => e.Trend)
+                .WithMany()
+                .HasForeignKey(e => e.TrendId)
+                .HasPrincipalKey(t => t.TrendId)
+                .OnDelete(DeleteBehavior.Cascade);
             
             entity.HasIndex(e => e.TrendId);
         });

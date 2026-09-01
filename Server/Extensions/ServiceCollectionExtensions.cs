@@ -121,7 +121,7 @@ public static class ServiceCollectionExtensions
         // Register AI services
         services.AddHttpClient("AIProvider"); // Named HTTP client for AI providers
         services.AddScoped<IAiProviderService, AiProviderService>();
-        services.AddSingleton<IContentGeneratorService>(sp =>
+        services.AddScoped<IContentGeneratorService>(sp =>
         {
             var aiService = sp.GetRequiredService<IAiProviderService>();
             var templateGenerator = sp.GetRequiredService<ContentGeneratorService>();
