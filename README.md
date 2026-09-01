@@ -20,8 +20,9 @@
 | 07 | Feed & Timeline | COMPLETE |
 | 08 | NPC Simulator Foundation | COMPLETE |
 | 09 | NPC Population Generation | COMPLETE |
+| 10 | NPC Behavior Simulation | COMPLETE |
 
-**NEXT: PART 10 — NPC BEHAVIOR SIMULATION**
+**NEXT: PART 11 — NPC BACKGROUND SIMULATION**
 
 ## Architecture
 
@@ -457,10 +458,179 @@ public class PopulationResult
 - Profile generation by type
 - Distribution validation
 
+## NPC Behavior Simulation
+
+### Overview
+The NPC behavior system brings NPCs to life by making them active social media users capable of following, liking, commenting, posting, and more. All decisions are influenced by personality traits, interests, and account type.
+
+### Behavior Pipeline
+```
+NPC becomes due
+      ↓
+Gather social/content context
+      ↓
+Generate candidate actions
+      ↓
+Filter impossible actions
+      ↓
+Score actions
+      ↓
+Choose action
+      ↓
+Validate social rules
+      ↓
+Execute action
+      ↓
+Record action history
+      ↓
+Schedule next simulation
+```
+
+### Supported Actions
+- **ViewFeed** — Browse content
+- **ViewPost** — View specific post
+- **LikePost** — Like a post
+- **UnlikePost** — Unlike a previously liked post
+- **Comment** — Comment on a post
+- **Follow** — Follow an account
+- **Unfollow** — Unfollow an account
+- **CreatePost** — Create a new post
+- **Search** — Search for content/accounts
+
+### Behavior Configuration (NpcBehaviorConfig)
+```csharp
+public class NpcBehaviorConfig
+{
+    public int MaxCandidateAccounts { get; set; } = 50;
+    public int MaxCandidatePosts { get; set; } = 30;
+    public double BaseActionProbability { get; set; } = 0.7;
+    public int PostCooldownSeconds { get; set; } = 300;
+    public int MaxFollowsPerTick { get; set; } = 2;
+    public int MaxLikesPerTick { get; set; } = 5;
+    public int MaxCommentsPerTick { get; set; } = 3;
+    public int MaxUnfollowsPerTick { get; set; } = 1;
+    public int RecentPostsHours { get; set; } = 24;
+    public int MaxFollowingBeforeUnfollow { get; set; } = 200;
+    public bool EnableExploration { get; set; } = true;
+    public double ExplorationRate { get; set; } = 0.3;
+}
+```
+
+### Services
+
+#### INpcBehaviorService
+Main service for NPC behavior execution:
+- `ProcessBehaviorAsync(npc, config)` — Execute one simulation tick
+- `GenerateCandidatesAsync(npc, config)` — Generate possible actions
+- `CanFollowAsync(npcAccountId, targetAccountId)` — Validate follow action
+- `CanLikeAsync(npcAccountId, postId)` — Validate like action
+- `GetRecentPostsAsync(npc, limit, hours)` — Get posts for engagement
+- `GetCandidateAccountsAsync(npc, limit)` — Get accounts for following
+
+#### INpcDecisionService
+Decision-making service:
+- `EvaluateAndSelect(npc, candidates, random)` — Select best action
+- `GetPersonalityModifier(personality, actionType)` — Personality influence
+- `GetAccountTypeModifier(accountType, actionType)` — Account type influence
+- `CalculateFinalScore(candidate, personality, accountType, relevance)` — Final score
+
+#### IContentRelevanceService
+Content relevance scoring:
+- `CalculatePostRelevance(post, interests)` — Score post relevance
+- `CalculateAccountRelevance(account, interests)` — Score account relevance
+- `ExtractTopics(content)` — Extract interest topics from text
+
+#### IContentGeneratorService
+Template-based content generation (placeholder for LLM):
+- `GeneratePostContent(npc, random)` — Generate post text
+- `GenerateCommentContent(npc, post, random)` — Generate comment text
+
+### Personality Influence (Big Five)
+
+| Trait | Effect |
+|-------|--------|
+| Openness | Increases exploration, commenting, following |
+| Conscientiousness | Increases consistent posting |
+| Extraversion | Increases social actions (following) |
+| Agreeableness | Increases positive engagement (likes, comments) |
+| Neuroticism | Decreases engagement (cautious behavior) |
+
+### Account Type Influence
+
+| Type | Posting | Following | Engagement |
+|------|---------|-----------|------------|
+| OrdinaryUser | Low (15%) | Moderate | Balanced |
+| Creator | High (40%) | Moderate | High |
+| Influencer | High (45%) | Low | Very High |
+| Celebrity | Moderate (35%) | Very Low | Low |
+| Official | High (40%) | Low | Low |
+| News | Very High (50%) | Moderate | Low |
+
+### Social Graph Rules
+NPCs respect the same rules as human users:
+- Cannot follow self
+- Cannot follow accounts that block them
+- Cannot follow accounts they block
+- Cannot interact with content from blocked accounts
+- Cannot like posts already liked
+- Cannot follow accounts already following
+
+### Content Relevance
+Deterministic keyword-based relevance using interest categories:
+- Gaming, Sports, Technology, Music, Movies, Television, Fashion, Food, Travel, Science, Health, Business, Finance, Education, LocalNews, WorldNews, Entertainment, GamingNews, SportsNews, TechNews
+
+### Activity States
+NPCs transition through states based on actions:
+- **Idle** — Not currently acting
+- **Browsing** — Viewing content
+- **Reading** — Consuming posts
+- **Posting** — Creating content
+- **Engaging** — Social interactions
+- **Offline** — Not simulated
+
+### NPC Action History
+All NPC actions are recorded in `NpcAction`:
+- Action type and target
+- Scheduled vs executed timestamps
+- Success/failure status
+- Content for posts/comments
+
+### Tests
+
+#### NpcDecisionServiceTests (15 tests)
+- Personality modifiers for all Big Five traits
+- Account type modifiers
+- Score calculation and clamping
+- Deterministic selection with seed
+- Candidate evaluation
+
+#### ContentRelevanceServiceTests (8 tests)
+- Topic extraction from text
+- Post relevance calculation
+- Account relevance calculation
+- Interest strength effects
+
+#### ContentGeneratorServiceTests (6 tests)
+- Template-based generation
+- Account type-specific content
+- Deterministic generation with seed
+- Comment type selection
+
+#### NpcBehaviorIntegrationTests (14 tests)
+- Candidate generation
+- Follow/like/comment execution
+- Block rule enforcement
+- Action recording
+- Edge case handling
+
+#### NpcBehaviorPerformanceTests (3 tests)
+- 100 NPC processing performance
+- Candidate generation performance
+- Content relevance calculation performance
+
 ### Intentionally Not Implemented
 
-- **LLM Integration** — NPC content generation via Ollama/Qwen (future part)
-- **NPC Behavior** — Following, liking, commenting decisions (Part 10)
+- **LLM Integration** — Ollama/Qwen NPC content generation (future part)
 - **NPC-Specific API** — Admin endpoints for NPC management
 - **Background Processing** — Hosted service for tick execution
 - **Social Graph for NPCs** — NPC follows, relationships
@@ -789,6 +959,20 @@ $feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSi
 | Username generator determinism | PASS |
 | Profile generator by type | PASS |
 | Distribution validation | PASS |
+| NPC personality modifiers (Big Five) | PASS |
+| NPC account type modifiers | PASS |
+| NPC score calculation | PASS |
+| NPC deterministic selection | PASS |
+| NPC candidate evaluation | PASS |
+| Content relevance calculation | PASS |
+| Topic extraction | PASS |
+| Interest strength effects | PASS |
+| Template-based content generation | PASS |
+| NPC follow/like/comment execution | PASS |
+| Block rule enforcement | PASS |
+| NPC action recording | PASS |
+| NPC candidate generation | PASS |
+| NPC 100 NPC processing performance | PASS |
 
 ## License
 

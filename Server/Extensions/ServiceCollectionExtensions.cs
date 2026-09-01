@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SocialMediaSimulator.Server.Application.Models;
 using SocialMediaSimulator.Server.Application.Services;
 using SocialMediaSimulator.Server.Infrastructure.Persistence;
 
@@ -30,6 +31,29 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INpcService, NpcService>();
         services.AddScoped<INpcSimulationService, NpcSimulationService>();
         services.AddScoped<INpcPopulationService, NpcPopulationService>();
+        
+        // Register NPC behavior services
+        services.AddSingleton<IContentRelevanceService, ContentRelevanceService>();
+        services.AddSingleton<IContentGeneratorService, ContentGeneratorService>();
+        services.AddSingleton<INpcDecisionService, NpcDecisionService>();
+        services.AddScoped<INpcBehaviorService, NpcBehaviorService>();
+        
+        // Register behavior configuration
+        services.AddSingleton<NpcBehaviorConfig>(sp => new NpcBehaviorConfig
+        {
+            MaxCandidateAccounts = 50,
+            MaxCandidatePosts = 30,
+            BaseActionProbability = 0.7,
+            PostCooldownSeconds = 300,
+            MaxFollowsPerTick = 2,
+            MaxLikesPerTick = 5,
+            MaxCommentsPerTick = 3,
+            MaxUnfollowsPerTick = 1,
+            RecentPostsHours = 24,
+            MaxFollowingBeforeUnfollow = 200,
+            EnableExploration = true,
+            ExplorationRate = 0.3
+        });
 
         return services;
     }

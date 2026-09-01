@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SocialMediaSimulator.Server.Application.Models;
 using SocialMediaSimulator.Server.Domain.Entities;
 using SocialMediaSimulator.Server.Infrastructure.Persistence;
 
@@ -8,11 +9,19 @@ public class NpcSimulationService : INpcSimulationService
 {
     private readonly AppDbContext _context;
     private readonly INpcService _npcService;
+    private readonly INpcBehaviorService? _behaviorService;
+    private readonly NpcBehaviorConfig _behaviorConfig;
 
-    public NpcSimulationService(AppDbContext context, INpcService npcService)
+    public NpcSimulationService(
+        AppDbContext context, 
+        INpcService npcService,
+        INpcBehaviorService? behaviorService = null,
+        NpcBehaviorConfig? behaviorConfig = null)
     {
         _context = context;
         _npcService = npcService;
+        _behaviorService = behaviorService;
+        _behaviorConfig = behaviorConfig ?? new NpcBehaviorConfig();
     }
 
     public async Task<IEnumerable<NpcProfile>> GetDueNpcsAsync(int limit = 100)
@@ -22,15 +31,15 @@ public class NpcSimulationService : INpcSimulationService
         // Query NPCs that are:
         // 1. Active
         // 2. Due for simulation (NextSimulationAt <= now)
-        // Then filter for active accounts separately to avoid Include issues
         var dueNpcs = await _context.NpcProfiles
+            .Include(n => n.Account)
             .Where(n => n.IsActive)
             .Where(n => n.NextSimulationAt <= now)
             .OrderBy(n => n.NextSimulationAt)
             .Take(limit)
             .ToListAsync();
         
-        // Filter out NPCs whose accounts are not active
+        // Filter for active accounts
         return dueNpcs.Where(n => 
             n.Account != null && 
             n.Account.Status == AccountStatus.Active);
@@ -40,6 +49,8 @@ public class NpcSimulationService : INpcSimulationService
     {
         var npc = await _context.NpcProfiles
             .Include(n => n.Account)
+            .Include(n => n.Personality)
+            .Include(n => n.Interests)
             .FirstOrDefaultAsync(n => n.NpcId == npcId);
         
         if (npc == null || !npc.IsActive)
@@ -51,6 +62,33 @@ public class NpcSimulationService : INpcSimulationService
         if (npc.Account?.Status != AccountStatus.Active)
         {
             return;
+        }
+        
+        // Process behavior if service is available
+        if (_behaviorService != null)
+        {
+            // Set activity state based on action
+            npc.ActivityState = NpcActivityState.Engaging;
+            
+            var result = await _behaviorService.ProcessBehaviorAsync(npc, _behaviorConfig);
+            
+            // Update activity state based on result
+            if (result != null)
+            {
+                npc.ActivityState = result.ActionType switch
+                {
+                    NpcActionType.ViewFeed or NpcActionType.ViewPost or NpcActionType.Search => NpcActivityState.Reading,
+                    NpcActionType.CreatePost => NpcActivityState.Posting,
+                    NpcActionType.Follow or NpcActionType.Unfollow or NpcActionType.LikePost or 
+                        NpcActionType.UnlikePost or NpcActionType.Comment => NpcActivityState.Engaging,
+                    _ => NpcActivityState.Browsing
+                };
+            }
+        }
+        else
+        {
+            // No behavior service - just browse
+            npc.ActivityState = NpcActivityState.Browsing;
         }
         
         // Update simulation state
