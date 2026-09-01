@@ -105,5 +105,6 @@ app.MapCausalityEndpoints();
 app.MapOfflineEndpoints();
 app.MapViralityEndpoints();
 app.MapTrendEndpoints();
+app.MapRumorEndpoints();
 
 app.Run();

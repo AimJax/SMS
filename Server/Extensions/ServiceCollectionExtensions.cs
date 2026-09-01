@@ -192,6 +192,21 @@ public static class ServiceCollectionExtensions
             MaxEventsPerHour = configuration.GetValue<int>("EventSystem:MaxEventsPerHour", 10)
         };
         services.AddSingleton(eventConfig);
+        
+        // Register rumor configuration
+        var rumorConfig = new RumorConfig
+        {
+            Enabled = configuration.GetValue<bool>("Rumors:Enabled", true),
+            MinEngagementForRumor = configuration.GetValue<int>("Rumors:MinEngagementForRumor", 10),
+            RumorWindowHours = configuration.GetValue<int>("Rumors:RumorWindowHours", 48),
+            BaseSpreadProbability = configuration.GetValue<float>("Rumors:BaseSpreadProbability", 0.05f),
+            PlantedSpreadMultiplier = configuration.GetValue<float>("Rumors:PlantedSpreadMultiplier", 2.0f),
+            MaxNotableRumors = configuration.GetValue<int>("Rumors:MaxNotableRumors", 50),
+            EvidenceThresholdForResolution = configuration.GetValue<int>("Rumors:EvidenceThresholdForResolution", 3),
+            ProcessingIntervalMinutes = configuration.GetValue<int>("Rumors:ProcessingIntervalMinutes", 10)
+        };
+        services.AddSingleton(rumorConfig);
+        services.AddScoped<IRumorService, RumorService>();
 
         // Register hosted background service
         services.AddHostedService<NpcSimulationHostedService>();

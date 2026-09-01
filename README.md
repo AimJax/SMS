@@ -32,8 +32,9 @@
 | 19 | Virality & Trending | COMPLETE |
 | 20 | Topics & Trends | COMPLETE |
 | 21 | Deployment & Testing | COMPLETE |
+| 22 | Rumors & Misinformation | COMPLETE |
 
-**NEXT: PART 22 — News**
+**NEXT: PART 23 — Permanent Memory**
 
 ## Getting Started
 

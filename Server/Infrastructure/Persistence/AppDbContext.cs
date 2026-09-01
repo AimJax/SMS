@@ -42,6 +42,9 @@ public class AppDbContext : DbContext
     public DbSet<TrendPropagation> TrendPropagations => Set<TrendPropagation>();
     public DbSet<TopicSubscription> TopicSubscriptions => Set<TopicSubscription>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
+    public DbSet<Rumor> Rumors => Set<Rumor>();
+    public DbSet<AccountBelief> AccountBeliefs => Set<AccountBelief>();
+    public DbSet<RumorEvidence> RumorEvidence => Set<RumorEvidence>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -541,6 +544,95 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Key).IsRequired().HasMaxLength(200);
             
             entity.HasIndex(e => e.Key).IsUnique();
+        });
+        
+        // Rumor entity configuration
+        modelBuilder.Entity<Rumor>(entity =>
+        {
+            entity.ToTable("Rumors");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.RumorId).IsRequired();
+            entity.Property(e => e.Claim).IsRequired();
+            entity.Property(e => e.Summary).IsRequired();
+            entity.Property(e => e.TruthStatus).IsRequired();
+            entity.Property(e => e.SpreadType).IsRequired();
+            entity.Property(e => e.FirstSeenAt).IsRequired();
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.RumorId).IsUnique();
+            entity.HasIndex(e => e.TruthStatus);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.CommunityId);
+            entity.HasIndex(e => e.FirstSeenAt);
+            
+            // Use Guid SourcePostId to reference Post.PostId
+            entity.HasOne(e => e.SourcePost)
+                .WithMany()
+                .HasForeignKey(e => e.SourcePostId)
+                .HasPrincipalKey(p => p.PostId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(e => e.Community)
+                .WithMany()
+                .HasForeignKey(e => e.CommunityId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+        
+        // AccountBelief entity configuration
+        modelBuilder.Entity<AccountBelief>(entity =>
+        {
+            entity.ToTable("AccountBeliefs");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.AccountBeliefId).IsRequired();
+            entity.Property(e => e.AccountId).IsRequired();
+            entity.Property(e => e.RumorId).IsRequired();
+            entity.Property(e => e.Belief).IsRequired();
+            entity.Property(e => e.Confidence).IsRequired();
+            entity.Property(e => e.FormedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.AccountBeliefId).IsUnique();
+            entity.HasIndex(e => new { e.AccountId, e.RumorId }).IsUnique();
+            
+            // Use Guid RumorId to reference Rumor.RumorId
+            entity.HasOne(e => e.Rumor)
+                .WithMany(r => r.Beliefs)
+                .HasForeignKey(e => e.RumorId)
+                .HasPrincipalKey(r => r.RumorId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // RumorEvidence entity configuration
+        modelBuilder.Entity<RumorEvidence>(entity =>
+        {
+            entity.ToTable("RumorEvidence");
+            
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.EvidenceId).IsRequired();
+            entity.Property(e => e.RumorId).IsRequired();
+            entity.Property(e => e.Description).IsRequired();
+            entity.Property(e => e.SupportsRumor).IsRequired();
+            entity.Property(e => e.CredibilityScore).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.EvidenceId).IsUnique();
+            entity.HasIndex(e => e.RumorId);
+            
+            // Use Guid RumorId to reference Rumor.RumorId
+            entity.HasOne(e => e.Rumor)
+                .WithMany(r => r.Evidence)
+                .HasForeignKey(e => e.RumorId)
+                .HasPrincipalKey(r => r.RumorId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
