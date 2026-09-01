@@ -80,5 +80,6 @@ app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapGraphEndpoints();
 app.MapPostEndpoints();
+app.MapFeedEndpoints();
 
 app.Run();

@@ -17,8 +17,9 @@
 | 04 | Accounts & Authentication | COMPLETE |
 | 05 | Social Graph | COMPLETE |
 | 06 | Posts & Engagement | COMPLETE |
+| 07 | Feed & Timeline | COMPLETE |
 
-**NEXT: PART 07 — FEED & TIMELINE**
+**NEXT: PART 08 — NPC SIMULATOR FOUNDATION**
 
 ## Architecture
 
@@ -44,7 +45,7 @@ Server/
 │   ├── Controllers/       API endpoints (Auth, Account, Graph, Posts)
 │   └── Middleware/       Exception handling
 ├── Application/
-│   └── Services/         Business logic (AccountService, JwtService, SocialGraphService, PostService)
+│   └── Services/         Business logic (AccountService, JwtService, SocialGraphService, PostService, FeedService)
 ├── Domain/
 │   └── Entities/         Account, Profile, Follow, Block, Mute, AccountHistory, Post, PostLike, Comment
 ├── Infrastructure/
@@ -134,6 +135,43 @@ When Account A blocks Account B:
 ### Soft Delete Behavior
 Posts and comments use soft delete (Status field) to preserve data integrity and history.
 
+## Feed & Timeline Architecture
+
+### Feed Service
+The feed is generated server-side using `IFeedService`:
+- Queries posts from followed accounts
+- Filters out blocked and muted accounts
+- Uses cursor-based pagination for scalability
+- Batches queries to avoid N+1 patterns
+
+### Feed Response Format
+```json
+{
+  "items": [
+    {
+      "postId": "guid",
+      "authorAccountId": "guid",
+      "authorUsername": "string",
+      "authorDisplayName": "string",
+      "authorAvatarUrl": "string|null",
+      "content": "string",
+      "createdAt": "datetime",
+      "likeCount": 0,
+      "commentCount": 0,
+      "isLikedByCurrentUser": true|false
+    }
+  ],
+  "nextCursor": "cursor-string|null",
+  "pageSize": 20
+}
+```
+
+### Cursor-Based Pagination
+- Cursor format: `{timestamp}_{postId}`
+- Client stores cursor and sends it to get next page
+- `nextCursor: null` indicates no more pages
+- Deterministic ordering prevents duplicates
+
 ## Authentication
 
 - **JWT Bearer Tokens** — 7-day expiration
@@ -178,6 +216,19 @@ Posts and comments use soft delete (Status field) to preserve data integrity and
 | `/api/posts/{postId}/comments` | GET | No | Get post comments (paginated) |
 | `/api/posts/{postId}/comments` | POST | Yes | Add comment to post |
 | `/api/comments/{commentId}` | DELETE | Yes (owner) | Delete comment |
+
+### Feed & Timeline
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/feed` | GET | Yes | Get personalized feed |
+
+**Feed Behavior:**
+- Returns posts from accounts the authenticated user follows
+- Excludes posts from blocked accounts (in either direction)
+- Excludes posts from muted accounts
+- Excludes soft-deleted posts
+- Ordered by newest first
+- Cursor-based pagination for scalability
 
 ### Persistence Test
 | Endpoint | Method | Auth | Description |
@@ -396,6 +447,24 @@ $postId = "post-guid"
 Invoke-RestMethod "http://localhost:5225/api/posts/$postId/comments" -Method POST -Body (@{content="Great post!"} | ConvertTo-Json) -ContentType "application/json" -Headers @{"Authorization"="Bearer $token"}
 ```
 
+### Test Get Feed
+
+```powershell
+$token = "your-jwt-token"
+Invoke-RestMethod "http://localhost:5225/api/feed" -Headers @{"Authorization"="Bearer $token"}
+```
+
+### Test Feed Pagination
+
+```powershell
+$token = "your-jwt-token"
+# First page
+$feed1 = Invoke-RestMethod "http://localhost:5225/api/feed?pageSize=5" -Headers @{"Authorization"="Bearer $token"}
+# Next page using cursor
+$cursor = $feed1.nextCursor
+$feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSize=5" -Headers @{"Authorization"="Bearer $token"}
+```
+
 ## Verification Results
 
 | Test | Result |
@@ -440,6 +509,22 @@ Invoke-RestMethod "http://localhost:5225/api/posts/$postId/comments" -Method POS
 | Pagination in comments | PASS |
 | Post persistence (restart) | PASS |
 | Database schema (Posts/Comments) | PASS |
+| Feed endpoint (unauthenticated rejection) | PASS |
+| Feed endpoint (authenticated) | PASS |
+| Feed empty for new user | PASS |
+| Feed shows followed posts | PASS |
+| Feed excludes non-followed posts | PASS |
+| Feed excludes muted accounts | PASS |
+| Feed excludes blocked accounts | PASS |
+| Feed excludes reverse-blocked posts | PASS |
+| Feed excludes deleted posts | PASS |
+| Feed like count | PASS |
+| Feed comment count | PASS |
+| Feed IsLikedByCurrentUser | PASS |
+| Feed ordering (newest first) | PASS |
+| Feed pagination (no duplicates) | PASS |
+| Feed cursor pagination | PASS |
+| Feed persistence (restart) | PASS |
 
 ## License
 

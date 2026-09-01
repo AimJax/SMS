@@ -22,6 +22,9 @@ public static class ServiceCollectionExtensions
         
         // Register post service
         services.AddScoped<IPostService, PostService>();
+        
+        // Register feed service
+        services.AddScoped<IFeedService, FeedService>();
 
         return services;
     }

@@ -61,3 +61,28 @@ public record EngagementActionResponse(
     bool Success,
     string Message
 );
+
+/// <summary>
+/// Response for a feed item with engagement data
+/// </summary>
+public record FeedItemResponse(
+    Guid PostId,
+    Guid AuthorAccountId,
+    string AuthorUsername,
+    string AuthorDisplayName,
+    string? AuthorAvatarUrl,
+    string Content,
+    DateTime CreatedAt,
+    int LikeCount,
+    int CommentCount,
+    bool IsLikedByCurrentUser
+);
+
+/// <summary>
+/// Paginated feed response with cursor-based pagination
+/// </summary>
+public record FeedResponse(
+    IEnumerable<FeedItemResponse> Items,
+    string? NextCursor,
+    int PageSize
+);
