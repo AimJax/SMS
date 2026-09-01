@@ -26,8 +26,9 @@
 | 13 | AI Content Generation | COMPLETE |
 | 14 | Notifications System | COMPLETE |
 | 15 | Communities | COMPLETE |
+| 16 | Advanced Feed | COMPLETE |
 
-**NEXT: PART 16 — [To be determined]**
+**NEXT: PART 17 — [To be determined]**
 
 ## Architecture
 
@@ -228,15 +229,37 @@ The feed is generated server-side using `IFeedService`:
 ### Feed & Timeline
 | Endpoint | Method | Auth | Description |
 |----------|--------|------|-------------|
-| `/api/feed` | GET | Yes | Get personalized feed |
+| `/api/feed` | GET | Yes | Get personalized feed (algorithmic) |
+
+**Advanced Feed (Part 16):**
+The feed now uses algorithmic scoring with multiple factors:
+- **Recency** (25%) — Exponential decay, half-life of 6 hours
+- **Interest Match** (20%) — Matches post topics to user interests
+- **Relationship Affinity** (20%) — Stronger signal from friends/followed accounts
+- **Engagement** (15%) — Log-normalized likes/comments with velocity bonus
+- **Community** (10%) — Boost for posts from joined communities
+- **Fame** (5%) — Minor boost for high-profile accounts
+- **Discovery** (5%) — Boost for non-followed accounts
+
+**Query Parameters:**
+- `cursor` — Pagination cursor
+- `pageSize` — Items per page (1-50, default 20)
+- `includeDiscovery` — Include non-followed content (default true)
+- `echoStrength` — Echo chamber strength override (0.0-1.0)
+
+**Echo Chamber Controls:**
+- 0.0 = Maximum diversity, strong discovery content
+- 0.5 = Balanced (default)
+- 1.0 = Strong echo chamber, minimal discovery
 
 **Feed Behavior:**
-- Returns posts from accounts the authenticated user follows
 - Excludes posts from blocked accounts (in either direction)
 - Excludes posts from muted accounts
 - Excludes soft-deleted posts
-- Ordered by newest first
+- Candidate pool limited to ~200 posts (last 24 hours)
+- Discovery quota: minimum 10% non-followed content
 - Cursor-based pagination for scalability
+- In-memory caching with 5-minute TTL
 
 ### Communities
 | Endpoint | Method | Auth | Description |

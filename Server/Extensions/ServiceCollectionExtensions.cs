@@ -28,6 +28,13 @@ public static class ServiceCollectionExtensions
         // Register feed service
         services.AddScoped<IFeedService, FeedService>();
         
+        // Load feed scoring configuration from appsettings
+        var feedScoringConfig = new FeedScoringConfig();
+        configuration.GetSection("FeedScoring").Bind(feedScoringConfig);
+        services.AddSingleton(feedScoringConfig);
+        services.AddSingleton<IFeedScoringService, FeedScoringService>();
+        services.AddScoped<IFeedCacheService, FeedCacheService>();
+        
         // Register notification service
         services.AddScoped<INotificationService, NotificationService>();
         

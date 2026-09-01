@@ -37,6 +37,11 @@ public class Post
     public string Content { get; set; } = string.Empty;
     
     /// <summary>
+    /// Topic tags for the post (comma-separated)
+    /// </summary>
+    public string? Topic { get; set; }
+    
+    /// <summary>
     /// Post status for soft delete
     /// </summary>
     public PostStatus Status { get; set; } = PostStatus.Active;

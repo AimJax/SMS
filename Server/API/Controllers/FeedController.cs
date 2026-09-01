@@ -21,7 +21,9 @@ public static class FeedController
         ClaimsPrincipal user,
         IFeedService feedService,
         [FromQuery] string? cursor = null,
-        [FromQuery] int pageSize = 20)
+        [FromQuery] int pageSize = 20,
+        [FromQuery] bool includeDiscovery = true,
+        [FromQuery] double? echoStrength = null)
     {
         var accountIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
         if (accountIdClaim == null || !int.TryParse(accountIdClaim.Value, out var accountId))
@@ -30,24 +32,39 @@ public static class FeedController
         }
 
         // Validate page size
-        if (pageSize < 1) pageSize = 20;
-        if (pageSize > 100) pageSize = 100;
+        pageSize = Math.Clamp(pageSize, 1, 50);
+        
+        // Validate echo strength
+        if (echoStrength.HasValue)
+        {
+            echoStrength = Math.Clamp(echoStrength.Value, 0.0, 1.0);
+        }
 
-        var (items, nextCursor) = await feedService.GetFeedAsync(accountId, cursor, pageSize);
+        // Use advanced feed
+        var response = await feedService.GetAdvancedFeedAsync(
+            accountId, 
+            cursor, 
+            pageSize,
+            includeDiscovery,
+            echoStrength);
 
-        var response = items.Select(item => new FeedItemResponse(
-            item.Post.PostId,
-            item.AuthorAccount.AccountId,
-            item.AuthorAccount.Username,
-            item.AuthorProfile?.DisplayName ?? item.AuthorAccount.Username,
-            item.AuthorProfile?.AvatarUrl,
-            item.Post.Content,
-            item.Post.CreatedAt,
-            item.LikeCount,
-            item.CommentCount,
-            item.IsLikedByCurrentUser
-        ));
+        // Map to response format
+        var feedResponse = new FeedResponse(
+            response.Items.Select(item => new FeedItemResponse(
+                item.PostId,
+                item.AuthorAccountId,
+                item.AuthorUsername,
+                item.AuthorDisplayName,
+                item.AuthorAvatarUrl,
+                item.Content,
+                item.CreatedAt,
+                item.LikeCount,
+                item.CommentCount,
+                item.IsLikedByCurrentUser
+            )),
+            response.NextCursor,
+            response.PageSize);
 
-        return Results.Ok(new FeedResponse(response, nextCursor, pageSize));
+        return Results.Ok(feedResponse);
     }
 }

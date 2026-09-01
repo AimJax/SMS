@@ -28,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<Community> Communities => Set<Community>();
     public DbSet<CommunityMembership> CommunityMemberships => Set<CommunityMembership>();
+    public DbSet<FeedImpression> FeedImpressions => Set<FeedImpression>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -144,13 +145,44 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
         
-        // Update Post entity configuration to include CommunityId
+        // Update Post entity configuration to include CommunityId and Topic
         modelBuilder.Entity<Post>(entity =>
         {
+            entity.Property(p => p.Topic).HasMaxLength(100);
+            entity.HasIndex(p => p.Topic);
+            entity.HasIndex(p => p.CreatedAt);
+            entity.HasIndex(p => p.AuthorAccountId);
+            
             entity.HasOne(p => p.Community)
                 .WithMany(c => c.Posts)
                 .HasForeignKey(p => p.CommunityId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+        
+        // Apply FeedImpression configuration
+        modelBuilder.Entity<FeedImpression>(entity =>
+        {
+            entity.ToTable("FeedImpressions");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.Score).IsRequired();
+            entity.Property(e => e.Position).IsRequired();
+            
+            // Indexes for efficient queries
+            entity.HasIndex(e => e.AccountId);
+            entity.HasIndex(e => e.PostId);
+            entity.HasIndex(e => new { e.AccountId, e.CreatedAt });
+            entity.HasIndex(e => new { e.AccountId, e.PostId });
+            
+            entity.HasOne(e => e.Account)
+                .WithMany()
+                .HasForeignKey(e => e.AccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(e => e.Post)
+                .WithMany()
+                .HasForeignKey(e => e.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
