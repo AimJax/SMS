@@ -1,23 +1,27 @@
 namespace SocialMediaSimulator.Client.Models;
 
 /// <summary>
-/// Authentication response
+/// Authentication response (matches server AuthResponse)
 /// </summary>
 public class AuthResponse
 {
-    public bool Success { get; set; }
-    public string? Token { get; set; }
-    public Guid? UserId { get; set; }
-    public string? Error { get; set; }
+    public string Token { get; set; } = string.Empty;
+    public AccountData? Account { get; set; }
 }
 
 /// <summary>
-/// Login request
+/// Account data from auth endpoints (matches server AccountResponse)
 /// </summary>
-public class LoginRequest
+public class AccountData
 {
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
+    public Guid AccountId { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+    public string? Bio { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? AccountType { get; set; }
+    public string? Status { get; set; }
+    public DateTime? CreatedAt { get; set; }
 }
 
 /// <summary>
@@ -26,7 +30,25 @@ public class LoginRequest
 public class RegisterRequest
 {
     public string Username { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+    public string? Bio { get; set; }
+    public string? Email { get; set; }
+}
+
+/// <summary>
+/// Login request
+/// </summary>
+public class LoginRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Error response
+/// </summary>
+public class ErrorResponse
+{
+    public string Error { get; set; } = string.Empty;
 }

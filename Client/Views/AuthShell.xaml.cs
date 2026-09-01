@@ -1,4 +1,3 @@
-using SocialMediaSimulator.Client.ViewModels;
 using SocialMediaSimulator.Client.Models;
 
 namespace SocialMediaSimulator.Client.Views;
@@ -22,16 +21,16 @@ public partial class AuthShell : ContentPage
         // Header
         mainLayout.Add(new Label 
         { 
-            Text = "Create Your Account", 
+            Text = "Social Media Simulator", 
             FontSize = 28, 
             FontAttributes = FontAttributes.Bold,
-            TextColor = Color.FromArgb("#F5F5F7"),
+            TextColor = Color.FromArgb("#F5A623"),
             HorizontalOptions = LayoutOptions.Center,
             Margin = new Thickness(0, 50, 0, 10)
         });
         mainLayout.Add(new Label 
         { 
-            Text = "Set up your social media profile", 
+            Text = "Create your NPC world account", 
             FontSize = 14,
             TextColor = Color.FromArgb("#9E9EA8"),
             HorizontalOptions = LayoutOptions.Center
@@ -67,8 +66,18 @@ public partial class AuthShell : ContentPage
             HeightRequest = 50
         };
 
-        _errorLabel = new Label { TextColor = Color.FromArgb("#E53935"), FontSize = 12, IsVisible = false };
-        _loadingIndicator = new ActivityIndicator { IsRunning = false, HorizontalOptions = LayoutOptions.Center };
+        _errorLabel = new Label 
+        { 
+            TextColor = Color.FromArgb("#E53935"), 
+            FontSize = 12, 
+            IsVisible = false 
+        };
+        _loadingIndicator = new ActivityIndicator 
+        { 
+            IsRunning = false, 
+            HorizontalOptions = LayoutOptions.Center,
+            Color = Color.FromArgb("#F5A623")
+        };
 
         _submitButton = new Button 
         { 
@@ -117,22 +126,36 @@ public partial class AuthShell : ContentPage
 
         try
         {
-            // Create fake account locally and navigate to MainShell
-            var fakeAccount = new Account
+            // Register with the server
+            var response = await App.ApiService.RegisterAsync(
+                username,
+                displayName,
+                null,  // Email is optional on server
+                "sim123456",  // Default password
+                bio
+            );
+
+            if (response == null || string.IsNullOrEmpty(response.Token))
             {
-                AccountId = Guid.NewGuid(),
-                Username = username,
+                _errorLabel.Text = "Failed to create account. Is the server running?";
+                _errorLabel.IsVisible = true;
+                return;
+            }
+
+            // Create Account model from response
+            var account = new Account
+            {
+                AccountId = response.Account?.AccountId ?? Guid.NewGuid(),
+                Username = response.Account?.Username ?? username,
                 Profile = new AccountProfile
                 {
-                    DisplayName = displayName,
-                    Bio = bio,
-                    FollowerCount = 0,
-                    FollowingCount = 0
+                    DisplayName = response.Account?.DisplayName ?? displayName,
+                    Bio = response.Account?.Bio ?? bio
                 }
             };
 
-            // Set authenticated and navigate
-            App.SetAuthenticated(fakeAccount, "fake-token");
+            // Set authenticated and navigate to main app
+            App.SetAuthenticated(account, response.Token);
             
             if (Application.Current.Windows.Count > 0)
             {
@@ -141,7 +164,7 @@ public partial class AuthShell : ContentPage
         }
         catch (Exception ex)
         {
-            _errorLabel.Text = $"Error: {ex.Message}";
+            _errorLabel.Text = $"Error: {ex.Message}. Make sure the server is running at http://10.0.2.2:5225";
             _errorLabel.IsVisible = true;
         }
         finally

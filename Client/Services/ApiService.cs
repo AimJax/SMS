@@ -141,28 +141,29 @@ public class ApiService
 
     #region Auth
 
-    public async Task<AuthResponse?> LoginAsync(string email, string password)
+    public async Task<AuthResponse?> LoginAsync(string username, string password)
     {
-        var request = new { Email = email, Password = password };
+        var request = new LoginRequest { Username = username, Password = password };
         var response = await PostAsync<AuthResponse>("/api/auth/login", request);
-        if (response?.Success == true && !string.IsNullOrEmpty(response.Token))
+        if (response != null && !string.IsNullOrEmpty(response.Token))
         {
             SetAuthToken(response.Token);
         }
         return response;
     }
 
-    public async Task<AuthResponse?> RegisterAsync(string username, string displayName, string email, string password)
+    public async Task<AuthResponse?> RegisterAsync(string username, string displayName, string? email, string password, string? bio = null)
     {
         var request = new RegisterRequest 
         { 
             Username = username, 
             DisplayName = displayName, 
-            Email = email, 
-            Password = password 
+            Email = email,
+            Password = password,
+            Bio = bio
         };
         var response = await PostAsync<AuthResponse>("/api/auth/register", request);
-        if (response?.Success == true && !string.IsNullOrEmpty(response.Token))
+        if (response != null && !string.IsNullOrEmpty(response.Token))
         {
             SetAuthToken(response.Token);
         }

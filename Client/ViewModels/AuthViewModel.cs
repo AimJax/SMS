@@ -7,13 +7,12 @@ namespace SocialMediaSimulator.Client.ViewModels;
 public class AuthViewModel : BaseViewModel
 {
     private readonly ApiService _apiService;
-    private string _email = string.Empty;
-    private string _password = string.Empty;
     private string _username = string.Empty;
     private string _displayName = string.Empty;
+    private string _bio = string.Empty;
+    private string _password = string.Empty;
     private string _errorMessage = string.Empty;
     private bool _isLoading;
-    private bool _isRegistering;
 
     public event EventHandler<(Account Account, string Token)>? AuthSucceeded;
 
@@ -22,19 +21,6 @@ public class AuthViewModel : BaseViewModel
         _apiService = apiService;
         LoginCommand = new Command(async () => await LoginAsync());
         RegisterCommand = new Command(async () => await RegisterAsync());
-        ToggleModeCommand = new Command(() => IsRegistering = !IsRegistering);
-    }
-
-    public string Email
-    {
-        get => _email;
-        set => SetProperty(ref _email, value);
-    }
-
-    public string Password
-    {
-        get => _password;
-        set => SetProperty(ref _password, value);
     }
 
     public string Username
@@ -49,6 +35,18 @@ public class AuthViewModel : BaseViewModel
         set => SetProperty(ref _displayName, value);
     }
 
+    public string Bio
+    {
+        get => _bio;
+        set => SetProperty(ref _bio, value);
+    }
+
+    public string Password
+    {
+        get => _password;
+        set => SetProperty(ref _password, value);
+    }
+
     public string ErrorMessage
     {
         get => _errorMessage;
@@ -61,21 +59,14 @@ public class AuthViewModel : BaseViewModel
         set => SetProperty(ref _isLoading, value);
     }
 
-    public bool IsRegistering
-    {
-        get => _isRegistering;
-        set => SetProperty(ref _isRegistering, value);
-    }
-
     public ICommand LoginCommand { get; }
     public ICommand RegisterCommand { get; }
-    public ICommand ToggleModeCommand { get; }
 
     async Task LoginAsync()
     {
-        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
         {
-            ErrorMessage = "Please enter email and password";
+            ErrorMessage = "Please enter username and password";
             return;
         }
 
@@ -84,16 +75,22 @@ public class AuthViewModel : BaseViewModel
 
         try
         {
-            var response = await _apiService.LoginAsync(Email, Password);
-            if (response?.Success == true)
+            var response = await _apiService.LoginAsync(Username, Password);
+            if (response != null && !string.IsNullOrEmpty(response.Token))
             {
                 var account = await _apiService.GetCurrentAccountAsync();
-                var token = response!.Token!;
-                AuthSucceeded?.Invoke(this, (account!, token));
+                if (account != null)
+                {
+                    AuthSucceeded?.Invoke(this, (account, response.Token));
+                }
+                else
+                {
+                    ErrorMessage = "Failed to get account info";
+                }
             }
             else
             {
-                ErrorMessage = response?.Error ?? "Login failed";
+                ErrorMessage = "Login failed";
             }
         }
         catch (Exception ex)
@@ -108,10 +105,9 @@ public class AuthViewModel : BaseViewModel
 
     async Task RegisterAsync()
     {
-        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Email) || 
-            string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(DisplayName))
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(DisplayName))
         {
-            ErrorMessage = "Please fill in all fields";
+            ErrorMessage = "Username and Display Name are required";
             return;
         }
 
@@ -120,16 +116,33 @@ public class AuthViewModel : BaseViewModel
 
         try
         {
-            var response = await _apiService.RegisterAsync(Username, DisplayName, Email, Password);
-            if (response?.Success == true)
+            var response = await _apiService.RegisterAsync(Username, DisplayName, null, Password ?? "sim123456", Bio);
+            if (response != null && !string.IsNullOrEmpty(response.Token))
             {
                 var account = await _apiService.GetCurrentAccountAsync();
-                var token = response!.Token!;
-                AuthSucceeded?.Invoke(this, (account!, token));
+                if (account != null)
+                {
+                    AuthSucceeded?.Invoke(this, (account, response.Token));
+                }
+                else
+                {
+                    // Create account from response
+                    var acc = new Account
+                    {
+                        AccountId = response.Account?.AccountId ?? Guid.NewGuid(),
+                        Username = response.Account?.Username ?? Username,
+                        Profile = new AccountProfile
+                        {
+                            DisplayName = response.Account?.DisplayName ?? DisplayName,
+                            Bio = response.Account?.Bio ?? Bio
+                        }
+                    };
+                    AuthSucceeded?.Invoke(this, (acc, response.Token));
+                }
             }
             else
             {
-                ErrorMessage = response?.Error ?? "Registration failed";
+                ErrorMessage = "Registration failed. Server may not be running.";
             }
         }
         catch (Exception ex)
@@ -166,4 +179,20 @@ public class Command : ICommand
         try { await _execute(); }
         finally { _isExecuting = false; CanExecuteChanged?.Invoke(this, EventArgs.Empty); }
     }
+}
+
+/// <summary>
+/// Generic ICommand with parameter
+/// </summary>
+public class Command<T> : ICommand
+{
+    private readonly Action<T?> _execute;
+
+    public Command(Action<T?> execute) => _execute = execute;
+
+    public event EventHandler? CanExecuteChanged;
+
+    public bool CanExecute(object? parameter) => true;
+
+    public void Execute(object? parameter) => _execute((T?)parameter);
 }
