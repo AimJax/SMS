@@ -27,8 +27,9 @@
 | 14 | Notifications System | COMPLETE |
 | 15 | Communities | COMPLETE |
 | 16 | Advanced Feed | COMPLETE |
+| 17 | LLM-Driven Event System | COMPLETE |
 
-**NEXT: PART 17 — [To be determined]**
+**NEXT: PART 18 — Event Causality & Offline Simulation**
 
 ## Architecture
 
@@ -286,6 +287,64 @@ The feed now uses algorithmic scoring with multiple factors:
 - **Admin** — Can manage members
 - **Moderator** — Can moderate content
 - **Member** — Basic access
+
+## LLM-Driven Event System (Part 17)
+
+### Overview
+The LLM-Driven Event System introduces emergent storytelling to the simulation. Local Ollama acts as a narrative director, analyzing the social landscape and proposing interesting, dramatic events that emerge organically from the world state.
+
+### Architecture
+```
+Simulation Tick Loop
+       ↓
+World State Analysis (via Ollama)
+       ↓
+Event Proposal Generation
+       ↓
+Server Validation
+       ↓
+Event Execution (consequences applied)
+```
+
+### Event Types
+- **Drama**: JealousyIncident, PublicArgument, Betrayal, RedemptionArc, ComebackStory, DownfallStory
+- **Romance**: NewRelationship, Breakup, LoveTriangle, SecretRelationship, RelationshipMilestone, Reconciliation
+- **Social**: NewFriendship, FriendshipEnded, Alliance, Rivalry, FanWar, TrollAttack
+- **Fame**: RiseToFame, FallFromGrace, Scandal, Apology, Comeback, Cancellation
+- **Community**: CommunityDriven, CommunitySplit, CommunityMilestone, CommunityDrama
+- **Content**: ViralPost, ViralComment, QuotePostDrama, PollControversy
+- **Trend**: TrendStart, TrendPivot, TrendDeath
+- **News**: NewsCoverage, BreakingNews, NewsDebate
+
+### Event Entities
+- **Event**: Main event record with title, description, narrative context, participants, status
+- **EventParticipation**: Account involvement with role (Protagonist, Antagonist, Supporter, etc.)
+- **EventConsequence**: Audit trail of applied consequences (relationship changes, posts, etc.)
+
+### LLM Integration
+- Uses existing `IAiTextGenerationService` (Ollama via GenericHttpProvider)
+- System prompt defines narrative director role and rules
+- Events emerge from actual world state, not random generation
+- Validates all proposals before execution (account existence, block rules, etc.)
+
+### Configuration
+```json
+"EventSystem": {
+  "Enabled": true,
+  "EventGenerationIntervalTicks": 5,
+  "MaxActiveEvents": 20,
+  "EventDurationHours": 24,
+  "AutoApproveEvents": true
+}
+```
+
+### API Endpoints
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/events` | GET | No | Browse events with filters |
+| `/api/events/{id}` | GET | No | Event details with participants |
+| `/api/events/{id}/participants` | GET | No | Event participant list |
+| `/api/accounts/{id}/events` | GET | Yes | User's events |
 
 ## NPC Simulation Architecture
 

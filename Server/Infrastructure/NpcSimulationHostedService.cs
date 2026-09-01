@@ -6,6 +6,7 @@ namespace SocialMediaSimulator.Server.Infrastructure;
 /// <summary>
 /// Background service that runs the NPC simulation loop.
 /// Continuously processes simulation ticks at configured intervals.
+/// Also triggers LLM-driven event generation periodically.
 /// </summary>
 public class NpcSimulationHostedService : BackgroundService
 {
@@ -13,17 +14,20 @@ public class NpcSimulationHostedService : BackgroundService
     private readonly ISimulationStateService _stateService;
     private readonly ILogger<NpcSimulationHostedService> _logger;
     private readonly SimulationConfig _config;
+    private readonly EventConfig _eventConfig;
 
     public NpcSimulationHostedService(
         IServiceProvider serviceProvider,
         ISimulationStateService stateService,
         ILogger<NpcSimulationHostedService> logger,
-        SimulationConfig config)
+        SimulationConfig config,
+        EventConfig eventConfig)
     {
         _serviceProvider = serviceProvider;
         _stateService = stateService;
         _logger = logger;
         _config = config;
+        _eventConfig = eventConfig;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,8 +40,8 @@ public class NpcSimulationHostedService : BackgroundService
             return;
         }
 
-        _logger.LogInformation("NPC Simulation background service starting. Tick interval: {IntervalSeconds}s, Max NPCs per tick: {MaxNpcs}",
-            _config.TickIntervalSeconds, _config.MaxNpcsPerTick);
+        _logger.LogInformation("NPC Simulation background service starting. Tick interval: {IntervalSeconds}s, Max NPCs per tick: {MaxNpcs}, Event generation: {EventEnabled}",
+            _config.TickIntervalSeconds, _config.MaxNpcsPerTick, _eventConfig.Enabled);
 
         var tickNumber = 0L;
 
@@ -81,6 +85,12 @@ public class NpcSimulationHostedService : BackgroundService
                         
                         _logger.LogInformation("Tick {TickNumber} completed. NPCs processed: {NpcsProcessed}, Follows: {Follows}, Unfollows: {Unfollows}, Duration: {Duration:F2}ms",
                             tickNumber, npcsProcessed, result.FollowsCreated, result.UnfollowsCreated, duration);
+                        
+                        // LLM-driven event generation (periodic)
+                        if (_eventConfig.Enabled && tickNumber % _eventConfig.EventGenerationIntervalTicks == 0)
+                        {
+                            await TryGenerateEventAsync(scope.ServiceProvider, tickNumber);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -119,6 +129,63 @@ public class NpcSimulationHostedService : BackgroundService
         }
 
         _logger.LogInformation("NPC Simulation background service stopped");
+    }
+
+    private async Task TryGenerateEventAsync(IServiceProvider services, long tickNumber)
+    {
+        try
+        {
+            var eventService = services.GetRequiredService<IEventGenerationService>();
+            
+            // Check rate limiting
+            var activeEvents = services.GetRequiredService<IEventService>();
+            var recentEventCount = (await activeEvents.GetActiveEventsAsync(_eventConfig.MaxActiveEvents)).Count();
+            
+            if (recentEventCount >= _eventConfig.MaxActiveEvents)
+            {
+                _logger.LogDebug("Skipping event generation: max active events reached ({Max})", _eventConfig.MaxActiveEvents);
+                return;
+            }
+            
+            // Propose next event via LLM
+            var proposal = await eventService.ProposeNextEventAsync();
+            
+            if (proposal == null)
+            {
+                _logger.LogDebug("No event proposal generated (LLM returned null)");
+                return;
+            }
+            
+            // Validate the proposal
+            var validation = await eventService.ValidateProposalAsync(proposal);
+            
+            if (!validation.IsValid)
+            {
+                _logger.LogWarning("Event proposal rejected: {Errors}", string.Join(", ", validation.Errors));
+                return;
+            }
+            
+            if (validation.Warnings.Any())
+            {
+                _logger.LogDebug("Event proposal warnings: {Warnings}", string.Join(", ", validation.Warnings));
+            }
+            
+            // Execute the event
+            if (_eventConfig.AutoApproveEvents)
+            {
+                var evt = await eventService.ExecuteEventAsync(proposal);
+                _logger.LogInformation("Event {EventId} '{Title}' created via LLM at tick {TickNumber}", 
+                    evt.EventId, evt.Title, tickNumber);
+            }
+            else
+            {
+                _logger.LogDebug("Event proposal queued for approval: {Title}", proposal.Title);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate event at tick {TickNumber}", tickNumber);
+        }
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)

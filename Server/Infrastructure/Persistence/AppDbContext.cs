@@ -29,6 +29,9 @@ public class AppDbContext : DbContext
     public DbSet<Community> Communities => Set<Community>();
     public DbSet<CommunityMembership> CommunityMemberships => Set<CommunityMembership>();
     public DbSet<FeedImpression> FeedImpressions => Set<FeedImpression>();
+    public DbSet<Event> Events => Set<Event>();
+    public DbSet<EventParticipation> EventParticipations => Set<EventParticipation>();
+    public DbSet<EventConsequence> EventConsequences => Set<EventConsequence>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -182,6 +185,79 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Post)
                 .WithMany()
                 .HasForeignKey(e => e.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Apply Event configuration
+        modelBuilder.Entity<Event>(entity =>
+        {
+            entity.ToTable("Events");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).IsRequired();
+            entity.Property(e => e.NarrativeContext).IsRequired();
+            entity.Property(e => e.Topic).HasMaxLength(100);
+            entity.Property(e => e.Metadata).HasColumnType("TEXT");
+            
+            // Indexes for efficient queries
+            entity.HasIndex(e => new { e.Status, e.CreatedAt });
+            entity.HasIndex(e => new { e.Type, e.Status });
+            entity.HasIndex(e => e.Topic);
+            entity.HasIndex(e => e.CommunityId);
+            entity.HasIndex(e => e.IsDeleted);
+            
+            entity.HasOne(e => e.CreatorAccount)
+                .WithMany()
+                .HasForeignKey(e => e.CreatorAccountId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(e => e.Community)
+                .WithMany()
+                .HasForeignKey(e => e.CommunityId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasMany(e => e.Participations)
+                .WithOne(p => p.Event)
+                .HasForeignKey(p => p.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Apply EventParticipation configuration
+        modelBuilder.Entity<EventParticipation>(entity =>
+        {
+            entity.ToTable("EventParticipations");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.LLMReasoning).IsRequired();
+            
+            // Indexes for efficient queries
+            entity.HasIndex(e => new { e.EventId, e.AccountId });
+            entity.HasIndex(e => e.AccountId);
+            
+            entity.HasOne(e => e.Account)
+                .WithMany()
+                .HasForeignKey(e => e.AccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Apply EventConsequence configuration
+        modelBuilder.Entity<EventConsequence>(entity =>
+        {
+            entity.ToTable("EventConsequences");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.Parameters).HasColumnType("TEXT");
+            entity.Property(e => e.FailureReason).HasMaxLength(500);
+            
+            // Index for audit queries
+            entity.HasIndex(e => e.EventId);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.ProcessedAt);
+            
+            entity.HasOne(e => e.Event)
+                .WithMany()
+                .HasForeignKey(e => e.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

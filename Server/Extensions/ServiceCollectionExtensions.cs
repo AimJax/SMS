@@ -42,6 +42,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICommunityService, CommunityService>();
         services.AddScoped<ICommunitySeedService, CommunitySeedService>();
         
+        // Register event services
+        services.AddScoped<IEventService, EventService>();
+        services.AddScoped<IEventGenerationService, EventGenerationService>();
+        
         // Register NPC services
         services.AddScoped<INpcService, NpcService>();
         services.AddScoped<INpcSimulationService, NpcSimulationService>();
@@ -109,6 +113,19 @@ public static class ServiceCollectionExtensions
 
         // Register simulation state service (singleton for state sharing)
         services.AddSingleton<ISimulationStateService, SimulationStateService>();
+        
+        // Register event configuration
+        var eventConfig = new EventConfig
+        {
+            Enabled = configuration.GetValue<bool>("EventSystem:Enabled", true),
+            EventGenerationIntervalTicks = configuration.GetValue<int>("EventSystem:EventGenerationIntervalTicks", 5),
+            MaxActiveEvents = configuration.GetValue<int>("EventSystem:MaxActiveEvents", 20),
+            EventDurationHours = configuration.GetValue<int>("EventSystem:EventDurationHours", 24),
+            AccountEventCooldownHours = configuration.GetValue<int>("EventSystem:AccountEventCooldownHours", 2),
+            AutoApproveEvents = configuration.GetValue<bool>("EventSystem:AutoApproveEvents", true),
+            MaxEventsPerHour = configuration.GetValue<int>("EventSystem:MaxEventsPerHour", 10)
+        };
+        services.AddSingleton(eventConfig);
 
         // Register hosted background service
         services.AddHostedService<NpcSimulationHostedService>();
