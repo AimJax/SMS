@@ -19,8 +19,9 @@
 | 06 | Posts & Engagement | COMPLETE |
 | 07 | Feed & Timeline | COMPLETE |
 | 08 | NPC Simulator Foundation | COMPLETE |
+| 09 | NPC Population Generation | COMPLETE |
 
-**NEXT: PART 09 — NPC POPULATION GENERATION**
+**NEXT: PART 10 — NPC BEHAVIOR SIMULATION**
 
 ## Architecture
 
@@ -348,13 +349,121 @@ NPC personality and interests are generated from a GUID seed using deterministic
 #### NpcSimulationServiceTests (9 tests)
 - Due NPC filtering, inactive exclusion, state updates, batch processing, account status respect, activity state management
 
+## NPC Population Generation
+
+### Overview
+The population generation system creates large numbers of NPCs with realistic diversity in usernames, display names, bios, personalities, and interests.
+
+### Configuration
+
+#### PopulationConfig
+```csharp
+public class PopulationConfig
+{
+    public int PopulationSize { get; set; } = 1000;
+    public int? RandomSeed { get; set; }
+    public AccountTypeDistribution Distribution { get; set; } = AccountTypeDistribution.Default;
+    public string? BatchId { get; set; }
+}
+```
+
+#### AccountTypeDistribution
+Configurable account type percentages:
+```csharp
+public class AccountTypeDistribution
+{
+    public double OrdinaryUser { get; set; } = 70;  // 70%
+    public double Creator { get; set; } = 12;       // 12%
+    public double Influencer { get; set; } = 7;     // 7%
+    public double News { get; set; } = 5;           // 5%
+    public double Official { get; set; } = 4;       // 4%
+    public double Celebrity { get; set; } = 2;       // 2%
+}
+```
+
+### Services
+
+#### INpcPopulationService
+- `GeneratePopulationAsync(config)` — Generate NPCs with configuration
+- `GeneratePopulationAsync(size, seed)` — Simple generation with size and optional seed
+- `GetExistingNpcCountAsync()` — Count existing NPCs
+- `PopulationExistsAsync()` — Check if population exists
+- `ValidateConfig(config)` — Validate configuration
+
+### Username Generation
+Deterministic username generation with multiple strategies:
+- Adjective + Noun (e.g., "pixelwanderer", "nightowl")
+- Prefix + Noun (e.g., "techcreator", "cityupdates")
+- Name-style (e.g., "alex42", "taylor_smith")
+- Numbered (e.g., "gamer123")
+
+Collision detection prevents duplicates within the same generation.
+
+### Profile Generation
+Profile data varies by account type:
+- **OrdinaryUser** — Personal/social bios
+- **Creator** — Content-oriented bios
+- **Influencer** — Lifestyle-focused bios
+- **Celebrity** — Public personality bios
+- **Official** — Institutional bios
+- **News** — News/media bios
+
+Avatar URLs use DiceBear API with username as seed.
+
+### PopulationResult
+```csharp
+public class PopulationResult
+{
+    public bool Success { get; set; }
+    public int NpcsCreated { get; set; }
+    public int NpcsFailed { get; set; }
+    public TimeSpan Elapsed { get; set; }
+    public string? ErrorMessage { get; set; }
+    public Dictionary<AccountType, int> Distribution { get; set; }
+    public int? SeedUsed { get; set; }
+}
+```
+
+### Duplicate Generation Prevention
+- System prevents duplicate generation if population already exists
+- Must clear existing population before regenerating
+- Each generation has optional batch identifier
+
+### Performance
+- Tested with 1,000 NPCs in ~2 minutes (in-memory database)
+- Uses efficient batch processing
+- Deterministic seed for reproducible results
+
+### Tests
+
+#### NpcPopulationServiceTests (18 tests)
+- Configuration validation
+- Account type distribution
+- Duplicate generation prevention
+- Deterministic generation
+- All NPC data creation
+- Username uniqueness
+- Personality validity
+- Interest validity
+
+#### NpcPopulationPerformanceTests (3 tests)
+- 1000 NPC generation performance
+- 100 NPC generation performance
+- 10 NPC generation performance
+
+#### GeneratorTests (10 tests)
+- Username generation uniqueness
+- Deterministic generation
+- Profile generation by type
+- Distribution validation
+
 ### Intentionally Not Implemented
 
 - **LLM Integration** — NPC content generation via Ollama/Qwen (future part)
-- **Population Generation** — Mass NPC creation (Part 09)
-- **Advanced Behavior** — Following, liking, commenting decisions
+- **NPC Behavior** — Following, liking, commenting decisions (Part 10)
 - **NPC-Specific API** — Admin endpoints for NPC management
 - **Background Processing** — Hosted service for tick execution
+- **Social Graph for NPCs** — NPC follows, relationships
 
 ### Persistence Test
 | Endpoint | Method | Auth | Description |
@@ -665,6 +774,21 @@ $feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSi
 | NPC batch processing | PASS |
 | NPC account status respect | PASS |
 | NPC activity state management | PASS |
+| Population generation (1 NPC) | PASS |
+| Population generation (10 NPCs) | PASS |
+| Population generation (100 NPCs) | PASS |
+| Population generation (1000 NPCs) | PASS |
+| Population config validation | PASS |
+| Population duplicate prevention | PASS |
+| Population deterministic seed | PASS |
+| Population account type distribution | PASS |
+| Population username uniqueness | PASS |
+| Population personality validity | PASS |
+| Population interest validity | PASS |
+| Username generator uniqueness | PASS |
+| Username generator determinism | PASS |
+| Profile generator by type | PASS |
+| Distribution validation | PASS |
 
 ## License
 

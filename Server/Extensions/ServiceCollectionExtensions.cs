@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
         // Register NPC services
         services.AddScoped<INpcService, NpcService>();
         services.AddScoped<INpcSimulationService, NpcSimulationService>();
+        services.AddScoped<INpcPopulationService, NpcPopulationService>();
 
         return services;
     }
