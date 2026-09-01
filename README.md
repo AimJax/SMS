@@ -31,8 +31,85 @@
 | 18 | Event Causality & Offline Simulation | COMPLETE |
 | 19 | Virality & Trending | COMPLETE |
 | 20 | Topics & Trends | COMPLETE |
+| 21 | Deployment & Testing | COMPLETE |
 
-**NEXT: PART 21 — Rumors & Misinformation**
+**NEXT: PART 22 — News**
+
+## Getting Started
+
+### Prerequisites
+- .NET 10 SDK
+- Android SDK
+- Ollama running locally (for AI content generation)
+
+### Configuration
+
+1. **Ollama Settings** — Edit `Server\appsettings.json`:
+   ```json
+   "AiProvider": {
+     "Provider": "Generic",
+     "BaseUrl": "http://localhost:11434",
+     "Model": "JFqxh_kUnppKPlpmBsDZBMeG",
+     "ApiKey": "eb83536349244577bc482f76d21bc55f.JFqxh_kUnppKPlpmBsDZBMeG"
+   }
+   ```
+
+2. **Android Settings** — Edit `Client\Configuration\AppConfig.cs`:
+   ```csharp
+   // For Android emulator: http://10.0.2.2:5225
+   // For physical device on same network: http://YOUR_COMPUTER_IP:5225
+   public string ApiBaseUrl { get; set; } = "http://10.0.2.2:5225";
+   ```
+
+### Running
+
+1. **Start Ollama** (if not running):
+   ```bash
+   ollama serve
+   ```
+
+2. **Start Server**:
+   ```bash
+   cd Server
+   dotnet run
+   ```
+   Expected output:
+   ```
+   Now listening on: http://0.0.0.0:5225
+   Database initialized successfully.
+   AI provider seeded: Generic / JFqxh_kUnppKPlpmBsDZBMeG
+   ```
+
+3. **Test Server**:
+   ```bash
+   curl http://localhost:5225/api/health
+   # Expected: {"status":"ok"}
+   ```
+
+4. **Build & Install Android**:
+   ```bash
+   cd Client
+   dotnet build -f net10.0-android -c Release
+   adb install -r bin/Release/net10.0-android/com.companyname.socialmediasimulator.apk
+   ```
+
+5. **Open app and register!**
+
+### First Run
+
+1. Register a new account
+2. Wait 1-2 minutes for simulation tick
+3. Watch NPCs start posting
+4. Join communities
+5. See trends emerge
+
+### Testing Checklist
+
+- [x] `dotnet build` succeeds
+- [x] `dotnet run` starts without errors
+- [x] AI config is seeded
+- [ ] NPCs post content
+- [ ] Feed populates
 
 ## Architecture
 

@@ -50,12 +50,27 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Initialize database on startup
+// Initialize database and seed data on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.EnsureCreated();
     Console.WriteLine("Database initialized successfully.");
+    
+    // Seed AI provider config
+    var aiConfigSeeder = scope.ServiceProvider.GetRequiredService<AiConfigSeederService>();
+    await aiConfigSeeder.SeedIfNeededAsync();
+    
+    // Seed topics
+    var topicSeedService = scope.ServiceProvider.GetRequiredService<ITopicSeedService>();
+    if (!await topicSeedService.TopicsExistAsync())
+    {
+        var result = await topicSeedService.SeedTopicsAsync();
+        if (result.Success)
+        {
+            Console.WriteLine($"Seeded {result.TopicsCreated} topics.");
+        }
+    }
 }
 
 // Configure the HTTP request pipeline
@@ -90,19 +105,5 @@ app.MapCausalityEndpoints();
 app.MapOfflineEndpoints();
 app.MapViralityEndpoints();
 app.MapTrendEndpoints();
-
-// Seed topics on startup
-using (var scope = app.Services.CreateScope())
-{
-    var topicSeedService = scope.ServiceProvider.GetRequiredService<ITopicSeedService>();
-    if (!await topicSeedService.TopicsExistAsync())
-    {
-        var result = await topicSeedService.SeedTopicsAsync();
-        if (result.Success)
-        {
-            Console.WriteLine($"Seeded {result.TopicsCreated} topics.");
-        }
-    }
-}
 
 app.Run();

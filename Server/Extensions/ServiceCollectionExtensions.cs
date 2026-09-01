@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICommunityService, CommunityService>();
         services.AddScoped<ICommunitySeedService, CommunitySeedService>();
         services.AddScoped<ITopicSeedService, TopicSeedService>();
+        services.AddScoped<AiConfigSeederService>();
         
         // Register event services
         services.AddScoped<IEventService, EventService>();
