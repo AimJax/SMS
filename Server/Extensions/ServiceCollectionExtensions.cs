@@ -25,6 +25,10 @@ public static class ServiceCollectionExtensions
         
         // Register feed service
         services.AddScoped<IFeedService, FeedService>();
+        
+        // Register NPC services
+        services.AddScoped<INpcService, NpcService>();
+        services.AddScoped<INpcSimulationService, NpcSimulationService>();
 
         return services;
     }

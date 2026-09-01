@@ -18,8 +18,9 @@
 | 05 | Social Graph | COMPLETE |
 | 06 | Posts & Engagement | COMPLETE |
 | 07 | Feed & Timeline | COMPLETE |
+| 08 | NPC Simulator Foundation | COMPLETE |
 
-**NEXT: PART 08 — NPC SIMULATOR FOUNDATION**
+**NEXT: PART 09 — NPC POPULATION GENERATION**
 
 ## Architecture
 
@@ -229,6 +230,131 @@ The feed is generated server-side using `IFeedService`:
 - Excludes soft-deleted posts
 - Ordered by newest first
 - Cursor-based pagination for scalability
+
+## NPC Simulation Architecture
+
+### Overview
+The NPC simulation system provides the foundation for populating the social media platform with automated accounts that can interact, post, like, comment, and follow other accounts. The architecture is designed for extensibility, allowing future parts to add sophisticated behavior and LLM-powered content generation.
+
+### NPC Account Types
+NPCs use the existing `AccountType` enum with appropriate simulation intervals:
+- **OrdinaryUser** — Regular users (30s interval)
+- **Creator** — Content creators (30s interval)
+- **Influencer** — Influencers (25s interval)
+- **Celebrity** — Celebrities (15s interval)
+- **Official** — Official/organizations (45s interval)
+- **News** — News accounts (20s interval)
+
+### NPC Entities
+
+#### NpcProfile
+Core NPC metadata and simulation state:
+- **NpcId** (GUID) — Stable identity
+- **AccountId** (FK) — Links to Account
+- **IsActive** — Whether NPC participates in simulation
+- **ActivityState** — Current activity (Idle, Browsing, Posting, Reading, Engaging, Offline)
+- **LastSimulatedAt** — When NPC was last processed
+- **NextSimulationAt** — When NPC should be processed next
+- **SimulationIntervalSeconds** — How often to simulate
+- **SimulationVersion** — Tracks state changes
+
+#### NpcPersonality
+Persistent Big Five personality traits (normalized 0.0-1.0):
+- **Openness** — Curiosity and creativity
+- **Conscientiousness** — Self-discipline and organization
+- **Extraversion** — Sociability and energy
+- **Agreeableness** — Trust and cooperation
+- **Neuroticism** — Emotional stability
+
+#### NpcInterest
+NPC interests in content categories:
+- **InterestKey** — Category name (Gaming, Politics, Sports, etc.)
+- **Strength** — Interest strength (0.3-1.0)
+
+Interest categories: Gaming, Politics, Sports, Technology, Music, Movies, Television, Fashion, Food, Travel, Science, Health, Business, Finance, Education, LocalNews, WorldNews, Entertainment, GamingNews, SportsNews, TechNews
+
+#### NpcAction
+Represents NPC actions for future behavior systems:
+- **ActionType** — Type of action (ViewPost, LikePost, Comment, Follow, etc.)
+- **TargetPostId/TargetAccountId** — Action targets
+- **Content** — Content for post/comment actions
+- **Executed** — Whether action was performed
+
+### NPC Services
+
+#### INpcService
+- `CreateNpcAsync()` — Creates Account + Profile + NpcProfile + Personality + Interests
+- `GetByNpcIdAsync()` / `GetByAccountIdAsync()` — Retrieves NPC with all related data
+- `IsNpcAsync()` — Checks if account is NPC
+- `ActivateAsync()` / `DeactivateAsync()` — Toggle NPC participation
+- `GeneratePersonality()` — Deterministic personality from seed
+- `GenerateInterests()` — Account-type-based interests from seed
+
+#### INpcSimulationService
+- `GetDueNpcsAsync()` — Finds NPCs due for simulation
+- `ProcessNpcAsync()` — Updates simulation state for one NPC
+- `ProcessTickAsync()` — Processes batch of due NPCs
+- `UpdateNpcAfterSimulationAsync()` — Updates activity state
+
+### Simulation Scheduling
+NPCs are processed based on `NextSimulationAt`:
+1. Query NPCs where `NextSimulationAt <= DateTime.UtcNow`
+2. Filter for active NPCs with active accounts
+3. Update `LastSimulatedAt` and calculate new `NextSimulationAt`
+4. Increment `SimulationVersion`
+
+### Deterministic Generation
+NPC personality and interests are generated from a GUID seed using deterministic random:
+- Same seed always produces identical traits
+- Enables reproducible simulation runs
+- Seed is the NPC's unique identifier
+
+### Database Schema
+
+#### NpcProfiles
+| Column | Type | Constraints |
+|--------|------|-------------|
+| NpcId | TEXT | UNIQUE (GUID) |
+| AccountId | INTEGER | FK → Accounts, UNIQUE |
+| IsActive | INTEGER | boolean |
+| ActivityState | INTEGER | enum |
+| NextSimulationAt | TEXT | indexed |
+| SimulationIntervalSeconds | INTEGER | |
+
+#### NpcPersonalities
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Openness/Conscientiousness/etc | REAL | 0.0-1.0 |
+
+#### NpcInterests
+| Column | Type | Constraints |
+|--------|------|-------------|
+| InterestKey | TEXT | max 50 |
+| Strength | REAL | 0.3-1.0 |
+| **UNIQUE** | | (NpcProfileId, InterestKey) |
+
+#### NpcActions
+| Column | Type | Constraints |
+|--------|------|-------------|
+| ActionType | INTEGER | enum |
+| TargetPostId/TargetAccountId | TEXT | nullable |
+| Executed | INTEGER | boolean |
+
+### Tests
+
+#### NpcServiceTests (14 tests)
+- NPC creation, simulation interval by account type, retrieval, identification, activation/deactivation, deterministic personality, interest generation, username collision
+
+#### NpcSimulationServiceTests (9 tests)
+- Due NPC filtering, inactive exclusion, state updates, batch processing, account status respect, activity state management
+
+### Intentionally Not Implemented
+
+- **LLM Integration** — NPC content generation via Ollama/Qwen (future part)
+- **Population Generation** — Mass NPC creation (Part 09)
+- **Advanced Behavior** — Following, liking, commenting decisions
+- **NPC-Specific API** — Admin endpoints for NPC management
+- **Background Processing** — Hosted service for tick execution
 
 ### Persistence Test
 | Endpoint | Method | Auth | Description |
@@ -525,6 +651,20 @@ $feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSi
 | Feed pagination (no duplicates) | PASS |
 | Feed cursor pagination | PASS |
 | Feed persistence (restart) | PASS |
+| NPC creation (account/profile/NPC) | PASS |
+| NPC simulation interval by type | PASS |
+| NPC retrieval with related data | PASS |
+| NPC identification (by ID/GUID) | PASS |
+| NPC activation/deactivation | PASS |
+| NPC deterministic personality | PASS |
+| NPC interest generation | PASS |
+| NPC username collision handling | PASS |
+| NPC due filtering | PASS |
+| NPC inactive exclusion | PASS |
+| NPC state updates | PASS |
+| NPC batch processing | PASS |
+| NPC account status respect | PASS |
+| NPC activity state management | PASS |
 
 ## License
 

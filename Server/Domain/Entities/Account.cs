@@ -79,4 +79,5 @@ public class Account
     // Navigation properties
     public Profile? Profile { get; set; }
     public ICollection<AccountHistory> History { get; set; } = new List<AccountHistory>();
+    public NpcProfile? NpcProfile { get; set; }
 }

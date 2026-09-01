@@ -20,6 +20,10 @@ public class AppDbContext : DbContext
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<PostLike> PostLikes => Set<PostLike>();
     public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<NpcProfile> NpcProfiles => Set<NpcProfile>();
+    public DbSet<NpcPersonality> NpcPersonalities => Set<NpcPersonality>();
+    public DbSet<NpcInterest> NpcInterests => Set<NpcInterest>();
+    public DbSet<NpcAction> NpcActions => Set<NpcAction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,5 +38,9 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new PostConfiguration());
         modelBuilder.ApplyConfiguration(new PostLikeConfiguration());
         modelBuilder.ApplyConfiguration(new CommentConfiguration());
+        modelBuilder.ApplyConfiguration(new NpcProfileConfiguration());
+        modelBuilder.ApplyConfiguration(new NpcPersonalityConfiguration());
+        modelBuilder.ApplyConfiguration(new NpcInterestConfiguration());
+        modelBuilder.ApplyConfiguration(new NpcActionConfiguration());
     }
 }
