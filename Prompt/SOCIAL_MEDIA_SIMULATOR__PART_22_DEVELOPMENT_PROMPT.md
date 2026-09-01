@@ -1,5 +1,5 @@
 # SOCIAL MEDIA SIMULATOR — PART 22 DEVELOPMENT PROMPT
-## NEWS
+## RUMORS & MISINFORMATION
 
 You are continuing development of the **Social Media Simulator** from the existing project.
 
@@ -21,31 +21,31 @@ Completed:
 01E  Android Client Foundation      COMPLETE
 01F  Foundation Checkpoint           COMPLETE
 02   Backend Architecture           COMPLETE
-03   Persistence                   COMPLETE
-04   Accounts & Authentication      COMPLETE
-05   Social Graph                  COMPLETE
-06   Posts & Engagement             COMPLETE
-07   Feed & Timeline               COMPLETE
+03   Persistence                     COMPLETE
+04   Accounts & Authentication       COMPLETE
+05   Social Graph                    COMPLETE
+06   Posts & Engagement              COMPLETE
+07   Feed & Timeline                 COMPLETE
 08   NPC Simulator Foundation       COMPLETE
-09   NPC Population Generation      COMPLETE
-10   NPC Behavior Simulation       COMPLETE
-11   NPC Background Simulation      COMPLETE
-12   NPC Social Graph             COMPLETE
-13   AI Content Generation         COMPLETE
-14   Notifications System          COMPLETE
-15   Communities                   COMPLETE
-16   Advanced Feed                 COMPLETE
-17   LLM-Driven Event System       COMPLETE
-18   Event Causality & Offline Sim  COMPLETE
-19   Virality                      COMPLETE
-20   Topics & Trends               COMPLETE
-21   Deployment & Testing          COMPLETE
+09   NPC Population Generation       COMPLETE
+10   NPC Behavior Simulation         COMPLETE
+11   NPC Background Simulation       COMPLETE
+12   NPC Social Graph                COMPLETE
+13   AI Content Generation           COMPLETE
+14   Notifications System            COMPLETE
+15   Communities                     COMPLETE
+16   Advanced Feed                   COMPLETE
+17   LLM-Driven Event System        COMPLETE
+18   Event Causality & Offline Sim   COMPLETE
+19   Virality                        COMPLETE
+20   Topics & Trends                 COMPLETE
+21   Deployment & Testing            COMPLETE
 ```
 
 Latest commit:
 
 ```text
-d2d93a8 — Remove old Part 21 prompt (replaced with Deployment Ready version)
+3499a09 — Part 21: Deployment & Testing - Make it runnable
 ```
 
 Remote:
@@ -66,23 +66,29 @@ Working tree should currently be clean. Run `git status` and `git fetch` as your
 
 # 1. WHY THIS PART, NOW
 
-Parts 01–21 built a social media platform with rumors, trends, virality, and communities. NPCs can gossip, rumors spread with uncertain truth, trends emerge — but there's no **organized reporting** of what's happening.
+Parts 01–21 built a social media platform with trends, virality, communities, events, and news accounts. The platform has organic content spreading, trending topics, and even news coverage — but there's no **uncertain information spreading**. Every post is treated as fact. Every rumor is believed instantly. No one questions anything.
 
-Part 22 introduces **News Accounts** — special accounts that detect events, identify trends, and report on what's happening in the network. News transforms the platform from "random social chatter" into a platform that **generates its own media**.
+Part 22 introduces **Rumors & Misinformation** — the critical social phenomenon where information spreads with uncertain truth value. This adds the messiness and drama of real social media:
 
-Without news, the platform is like a town where everyone talks but no one reports. With news:
-- News accounts cover trending topics
-- Viral stories get investigated
-- Events get reported
-- Rumors get fact-checked
-- The network can report on itself
-- Information becomes organized journalism
+- NPCs can gossip and spread unverified claims
+- Accounts can have beliefs that don't match reality
+- Contradicting evidence can emerge
+- Some accounts spread rumors deliberately
+- Rumors can be confirmed or debunked
+- The truth eventually emerges (or doesn't)
 
-News is foundational to:
-- Information credibility (Part 21 rumors → news coverage)
-- Reputation (accounts get reported on)
-- Social dynamics (news can create drama)
-- NPC memory (news records important events)
+Without rumors, the platform feels sterile and unrealistic. With rumors:
+- Social drama emerges naturally
+- NPCs have motivations beyond generic posting
+- Information ecosystems form
+- Echo chambers strengthen around rumors
+- News accounts have stories to cover
+
+Rumors are foundational to:
+- News coverage (Part 22+) — news reports on rumors
+- Reputation damage — rumors affect accounts
+- Social dynamics — rumors create drama
+- Echo chambers — rumors reinforce beliefs
 
 ---
 
@@ -91,22 +97,22 @@ News is foundational to:
 The existing backend contains from Parts 01–21:
 
 - Everything from Part 21 and earlier
-- **Rumors (Part 21):** Information spreading with uncertain truth
+- **News Accounts (Part 22):** News outlets covering topics
 - **Trends (Part 20):** Trending topics tracked
 - **Virality (Part 19):** Posts can go viral
 - **Events (Part 17):** World events detected
 - **Communities (Part 15):** Grouped interests
-- **NPCs (Parts 10-13):** NPCs with personalities
+- **NPCs (Parts 10-13):** NPCs with personalities including GossipTendency, DramaTendency
 - **Posts, Comments, Engagement (Parts 06-07):** Content system
 
 The infrastructure exists:
-- Trending topics ready for news coverage
-- Viral posts ready to be investigated
-- Events ready to be reported
-- Rumors ready to be fact-checked
-- Communities ready to be covered
+- Posts and comments ready to carry rumor content
+- NPC personalities designed for gossip behavior
+- Trends that rumors can attach to
+- Communities where rumors spread
+- News accounts ready to fact-check
 
-Part 22 adds the news layer: special accounts that report on the network.
+Part 22 adds the rumor concept: information with uncertain truth value that spreads through the network.
 
 ---
 
@@ -114,816 +120,1006 @@ Part 22 adds the news layer: special accounts that report on the network.
 
 ## Server Authoritative
 
-News is managed by the server. The server determines what news to generate, which news accounts cover what topics, and how news spreads.
+Rumors are managed by the server. The server tracks what information exists, how it spreads, and what people believe. The server never "auto-corrects" misinformation — it only provides mechanisms for truth to emerge.
 
 ## C# + LLM Hybrid
 
-- C# manages news state, detection, and propagation
-- LLM generates news content, articles, and headlines
-- Server validates all news-related actions
+- C# manages rumor state, spread mechanics, and belief calculations
+- LLM generates rumor content and assesses evidence plausibility
+- Server validates all rumor-related actions
 
 ## Permanent Data Rule
 
-All news articles, news accounts, and news history must NOT be automatically deleted/pruned.
+All rumors, beliefs, evidence, and contradictions must NOT be automatically deleted/pruned. Even debunked rumors remain in history.
 
-## News ≠ Rumors
+## Core Concept: Information ≠ Fact
 
 ```
-Rumors spread freely as unverified information.
-News reports on rumors, events, and trends with journalistic process.
-News can verify or debunk rumors.
+Information exists
+        ↓
+Spreads through network
+        ↓
+Becomes belief (different levels)
+        ↓
+Evidence accumulates
+        ↓
+Truth emerges (or doesn't)
+        ↓
+Some believe, some doubt
+        ↓
+Rumor persists or dies
 ```
 
 ---
 
 # PART 22 OBJECTIVE
 
-Implement a **News System** where special accounts report on the network:
+Implement a **Rumors & Misinformation System**:
 
-1. **News Account Entity** — Special accounts that report news
-2. **News Article Entity** — Articles written by news accounts
-3. **News Coverage** — What news accounts cover
-4. **Event Detection** — Detecting what to report
-5. **News Generation** — LLM-generated articles
-6. **News Feed** — How news appears in feeds
-7. **Cross-Community Exposure** — News reaching beyond communities
-8. **News API** — Endpoints for news management
+1. **Rumor Entity** — Information with truth status
+2. **AccountBelief Entity** — What each account believes
+3. **RumorEvidence Entity** — Supporting and contradicting evidence
+4. **Rumor Creation** — How rumors originate
+5. **Belief System** — How beliefs form and change
+6. **Rumor Spread** — How rumors propagate
+7. **Truth Emergence** — How rumors get confirmed or debunked
+8. **Rumor-Driven Posts** — Posts about rumors
+9. **NPC Rumor Behavior** — NPCs gossip intentionally
+10. **News-Rumor Integration** — News covers rumors
+11. **Rumor API** — Endpoints for rumor management
 
 Do NOT implement in this part:
-- Full fact-checking systems (beyond basic verification)
-- News moderation
-- Breaking news alerts
-- News comments or engagement
+- Deep investigation mechanics
+- Paid disinformation campaigns
+- Moderation or removal of rumors
+- Platform-wide fact-checks
 
 ---
 
 # PART 22 — REQUIRED FEATURES
 
-## 1. News Account Entity
+## 1. Rumor Entity
 
-Create a `NewsAccount` entity (or extend Account with News flag):
-
-```csharp
-public class NewsAccount
-{
-    public Guid Id { get; set; }
-    public Guid AccountId { get; set; }                // The account this news account belongs to
-    
-    // News Account Identity
-    public string NewsName { get; set; }              // "TechDaily", "SportsWire", "GossipDaily"
-    public string NewsTagline { get; set; }            // "Your daily tech news"
-    public string NewsBio { get; set; }                 // Description of the news outlet
-    
-    // Coverage
-    public NewsCategory Category { get; set; }          // See enum
-    public int CredibilityScore { get; set; }          // 0-100, starts at 50
-    public int SubscriberCount { get; set; }           // Accounts following for news
-    
-    // Performance
-    public int ArticlesPublished { get; set; }
-    public int TotalArticleViews { get; set; }
-    public double AccuracyRating { get; set; }         // How often they're correct (0.0-1.0)
-    public int BreakingNewsCount { get; set; }         // Breaking news they've reported
-    
-    // Style
-    public NewsTone Tone { get; set; }                // Serious, Casual, Sensational, Balanced
-    public int ReportFrequency { get; set; }           // Articles per hour target
-    
-    // Status
-    public bool IsActive { get; set; }
-    public bool IsVerified { get; set; }              // Verified news source
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-}
-
-public enum NewsCategory
-{
-    General,           // General news
-    Technology,        // Tech news
-    Sports,            // Sports news
-    Entertainment,     // Movies, music, celebrities
-    Politics,          // Political news
-    Business,          // Business and finance
-    Science,           // Science and health
-    Lifestyle,         // Fashion, food, travel
-    Gaming,            // Gaming news
-    Gossip,            // Celebrity gossip
-    Local,             // Local/community news
-    Crime              // Crime and justice
-}
-
-public enum NewsTone
-{
-    Serious,           // Formal, factual
-    Casual,            // Relaxed, conversational
-    Sensational,       // Dramatic, attention-grabbing
-    Balanced           // Neutral, multiple perspectives
-}
-```
-
----
-
-## 2. News Article Entity
+Create a `Rumor` entity:
 
 ```csharp
-public class NewsArticle
+public class Rumor
 {
     public Guid Id { get; set; }
-    public Guid NewsAccountId { get; set; }
     
-    // Article Content
-    public string Headline { get; set; }               // "Breaking: Major Update Announced"
-    public string Summary { get; set; }                // Brief summary (2-3 sentences)
-    public string Body { get; set; }                   // Full article (LLM generated)
-    public string ImagePrompt { get; set; }            // For potential image generation
+    // Content
+    public string Subject { get; set; }                  // "Kevin is dating Sarah"
+    public string Description { get; set; }              // Longer description
+    public Guid SubjectAccountId { get; set; }           // Who the rumor is about
     
-    // Article Metadata
-    public string[] Tags { get; set; }                 // Topics covered
-    public NewsCategory Category { get; set; }
-    public ArticleType Type { get; set; }             // See enum
+    // Truth Status
+    public RumorTruthStatus TruthStatus { get; set; }    // See enum
+    public float TruthConfidence { get; set; }           // 0.0 - 1.0 (system's estimate)
     
-    // Coverage
-    public Guid? CoveredTopicId { get; set; }         // Topic being covered
-    public Guid? CoveredRumorId { get; set; }          // Rumor being reported
-    public Guid? CoveredEventId { get; set; }          // Event being covered
-    public List<Guid> CoveredAccountIds { get; set; } // Accounts mentioned
+    // Origin
+    public Guid OriginAccountId { get; set; }            // Who started the rumor
+    public DateTime OriginDate { get; set; }
+    public Guid? OriginPostId { get; set; }             // Post that started it
     
-    // Engagement
-    public int Views { get; set; }
-    public int Shares { get; set; }
-    public int Comments { get; set; }
-    public int BreakingNewsBonus { get; set; }        // Extra engagement for breaking
+    // Rumor Type
+    public RumorType Type { get; set; }                  // See enum
+    public string Topic { get; set; }                    // Related topic
     
-    // Article Status
-    public ArticleStatus Status { get; set; }          // See enum
-    public bool IsBreakingNews { get; set; }
-    public bool IsVerified { get; set; }              // Sources verified
-    public DateTime? PublishedAt { get; set; }
+    // Metrics
+    public int BelieverCount { get; set; }              // How many believe it
+    public int DoubterCount { get; set; }               // How many doubt it
+    public int TotalMentions { get; set; }              // How many times mentioned
+    public int PostCount { get; set; }                  // Posts about this rumor
+    
+    // Evidence
+    public int SupportingEvidenceCount { get; set; }
+    public int ContradictingEvidenceCount { get; set; }
+    
+    // Lifecycle
+    public RumorStatus Status { get; set; }              // See enum
+    public DateTime? ConfirmedAt { get; set; }
+    public DateTime? DebunkedAt { get; set; }
+    public DateTime? DiedAt { get; set; }
+    
+    // Intentional vs Organic
+    public bool IsPlant { get; set; }                   // Deliberately spread?
+    public Guid? PlantingAccountId { get; set; }        // Who planted it
     
     // Timestamps
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
 
-public enum ArticleType
+public enum RumorTruthStatus
 {
-    Breaking,          // Breaking news
-    Report,            // Standard report
-    Investigation,     // In-depth investigation
-    FactCheck,         // Fact-checking article
-    Opinion,           // Opinion piece
-    Update,            // Follow-up update
-    Roundup            // Summary of multiple stories
+    Unknown = 0,           // Truth value unknown
+    LikelyTrue = 1,       // Evidence suggests true
+    LikelyFalse = 2,      // Evidence suggests false
+    ConfirmedTrue = 3,     // Officially confirmed true
+    ConfirmedFalse = 4,    // Officially confirmed false
+    Unverifiable = 5      // Can never be verified
 }
 
-public enum ArticleStatus
+public enum RumorType
 {
-    Draft,             // Being written
-    Published,         // Live
-    Updated,           // Updated with new info
-    Retracted,        // Removed/corrected
-    Archived           // Old article
+    Gossip,                // Social gossip ("dating", "friend breakup")
+    Scandal,              // Negative rumor ("cheating", "lying")
+    Achievement,           // Positive rumor ("got a job", "won award")
+    Relationship,          // Relationship changes
+    Professional,         // Career-related
+    Personal,             // Personal life
+    Conspiracy,           // Complex/layered rumor
+    Hoax                  // Deliberate fake
 }
-```
 
----
-
-## 3. News Account Seeding
-
-Seed news accounts on first run:
-
-```csharp
-public class NewsAccountSeeder
+public enum RumorStatus
 {
-    private static readonly List<NewsAccountSeed> DefaultAccounts = new()
-    {
-        new NewsAccountSeed { NewsName = "TechDaily", Category = NewsCategory.Technology, Tone = NewsTone.Serious },
-        new NewsAccountSeed { NewsName = "SportsWire", Category = NewsCategory.Sports, Tone = NewsTone.Casual },
-        new NewsAccountSeed { NewsName = "Entertainment Now", Category = NewsCategory.Entertainment, Tone = NewsTone.Sensational },
-        new NewsAccountSeed { NewsName = "GossipDaily", Category = NewsCategory.Gossip, Tone = NewsTone.Casual },
-        new NewsAccountSeed { NewsName = "ScienceWeekly", Category = NewsCategory.Science, Tone = NewsTone.Serious },
-        new NewsAccountSeed { NewsName = "GamingInsider", Category = NewsCategory.Gaming, Tone = NewsTone.Casual },
-        new NewsAccountSeed { NewsName = "LifestyleHub", Category = NewsCategory.Lifestyle, Tone = NewsTone.Balanced },
-        new NewsAccountSeed { NewsName = "PoliticsToday", Category = NewsCategory.Politics, Tone = NewsTone.Serious },
-        new NewsAccountSeed { NewsName = "GeneralNews", Category = NewsCategory.General, Tone = NewsTone.Balanced },
-        new NewsAccountSeed { NewsName = "BusinessDaily", Category = NewsCategory.Business, Tone = NewsTone.Serious }
-    };
-    
-    public async Task SeedAsync(AppDbContext context)
-    {
-        foreach (var seed in DefaultAccounts)
-        {
-            // Create NPC account for news
-            var account = new Account
-            {
-                Username = seed.NewsName.ToLower().Replace(" ", ""),
-                Email = $"{seed.NewsName.ToLower().Replace(" ", "")}@news.sms",
-                PasswordHash = "N/A", // News accounts don't login
-                DisplayName = seed.NewsName,
-                Bio = seed.NewsName + " - Your source for " + seed.Category.ToString().ToLower() + " news",
-                AccountType = AccountType.News,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-            
-            context.Accounts.Add(account);
-            await context.SaveChangesAsync();
-            
-            // Create news account
-            var newsAccount = new NewsAccount
-            {
-                AccountId = account.Id,
-                NewsName = seed.NewsName,
-                NewsTagline = $"Your {seed.Category} news source",
-                NewsBio = $"Official {seed.Category} news outlet",
-                Category = seed.Category,
-                Tone = seed.Tone,
-                CredibilityScore = 50,
-                ReportFrequency = 2, // 2 articles per hour
-                IsActive = true,
-                IsVerified = seed.Category == NewsCategory.General || seed.Category == NewsCategory.Politics,
-                CreatedAt = DateTime.UtcNow
-            };
-            
-            context.NewsAccounts.Add(newsAccount);
-        }
-        
-        await context.SaveChangesAsync();
-    }
+    Active = 0,            // Spreading
+    Stalling = 1,          // Interest declining
+    Confirmed = 2,         // Proven true
+    Debunked = 3,          // Proven false
+    Died = 4               // Faded away
 }
 ```
 
 ---
 
-## 4. News Generation Service
+## 2. AccountBelief Entity
 
-### INewsService
-
-```csharp
-public interface INewsService
-{
-    Task<NewsArticle> GenerateArticleAsync(Guid newsAccountId, NewsLead lead);
-    Task<List<NewsArticle>> GetFeedAsync(Guid accountId, int count = 20);
-    Task<NewsArticle> GetArticleAsync(Guid articleId);
-    Task<List<NewsLead>> DetectNewsWorthyEventsAsync();
-    Task ProcessNewsTickAsync();
-}
-```
-
-### News Detection
+Track what each account believes about rumors:
 
 ```csharp
-public async Task<List<NewsLead>> DetectNewsWorthyEventsAsync()
-{
-    var leads = new List<NewsLead>();
-    
-    // 1. Detect trending topics that need coverage
-    var trendingTopics = await _trendService.GetGlobalTrendsAsync(5);
-    foreach (var trend in trendingTopics)
-    {
-        if (!await _newsService.HasRecentCoverageAsync(trend.Query))
-        {
-            leads.Add(new NewsLead
-            {
-                Type = NewsLeadType.TrendCoverage,
-                Headline = $"Trending: {trend.DisplayName}",
-                Query = trend.Query,
-                Priority = CalculatePriority(trend)
-            });
-        }
-    }
-    
-    // 2. Detect viral stories
-    var viralPosts = await _postService.GetViralPostsAsync(since: DateTime.UtcNow.AddHours(-6));
-    foreach (var post in viralPosts)
-    {
-        if (!await _newsService.HasRecentCoverageAsync($"post:{post.Id}"))
-        {
-            leads.Add(new NewsLead
-            {
-                Type = NewsLeadType.ViralStory,
-                Headline = "Viral Story Emerging",
-                RelatedPostId = post.Id,
-                Priority = CalculatePriority(post)
-            });
-        }
-    }
-    
-    // 3. Detect rumors that need fact-checking
-    var activeRumors = await _rumorService.GetActiveRumorsAsync();
-    foreach (var rumor in activeRumors.Where(r => r.BelieverCount > 10))
-    {
-        if (!await _newsService.HasFactCheckAsync(rumor.Id))
-        {
-            leads.Add(new NewsLead
-            {
-                Type = NewsLeadType.FactCheck,
-                Headline = $"Rumor: {rumor.Subject}",
-                RumorId = rumor.Id,
-                Priority = CalculateRumorPriority(rumor)
-            });
-        }
-    }
-    
-    // 4. Detect significant events
-    var events = await _eventService.GetSignificantEventsAsync();
-    foreach (var evt in events)
-    {
-        if (!await _newsService.HasEventCoverageAsync(evt.Id))
-        {
-            leads.Add(new NewsLead
-            {
-                Type = NewsLeadType.EventCoverage,
-                Headline = $"Event: {evt.Title}",
-                EventId = evt.Id,
-                Priority = CalculateEventPriority(evt)
-            });
-        }
-    }
-    
-    // Sort by priority
-    return leads.OrderByDescending(l => l.Priority).ToList();
-}
-
-public class NewsLead
+public class AccountBelief
 {
     public Guid Id { get; set; }
-    public NewsLeadType Type { get; set; }
-    public string Headline { get; set; }
-    public string Query { get; set; }
-    public Guid? RelatedPostId { get; set; }
-    public Guid? RumorId { get; set; }
-    public Guid? EventId { get; set; }
-    public double Priority { get; set; }
+    public Guid AccountId { get; set; }
+    public Guid RumorId { get; set; }
+    
+    // Belief state
+    public BeliefLevel Belief { get; set; }             // See enum
+    public float Confidence { get; set; }                // 0.0 - 1.0
+    
+    // How they formed this belief
+    public BeliefSource Source { get; set; }             // See enum
+    public Guid? SourceAccountId { get; set; }           // Who told them
+    public Guid? SourcePostId { get; set; }              // Post they saw
+    
+    // History
+    public bool ChangedMind { get; set; }               // Did they change their belief?
+    public DateTime? PreviousBeliefDate { get; set; }
+    public BeliefLevel? PreviousBelief { get; set; }
+    
+    // Engagement
+    public int TimesShared { get; set; }
+    public int TimesCommented { get; set; }
+    
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 
-public enum NewsLeadType
+public enum BeliefLevel
 {
-    TrendCoverage,
-    ViralStory,
-    FactCheck,
-    EventCoverage,
-    Investigation
+    StronglyBelieves = 5,  // 100% sure true
+    Believes = 4,         // Probably true
+    Uncertain = 3,         // Could go either way
+    Doubts = 2,           // Probably false
+    StronglyDoubts = 1,   // 100% sure false
+    Unaware = 0           // Doesn't know about rumor
+}
+
+public enum BeliefSource
+{
+    DirectWitness,        // Saw it happen
+    TrustedFriend,        // Heard from trusted friend
+    CasualContact,        // Heard from casual contact
+    Post,                // Saw a post
+    Comment,             // Read a comment
+    Event,               // Saw it in an event
+    Trend,               // Saw it trending
+    News,                // Saw it from news account
+    FactCheck            // Official fact-check
 }
 ```
 
-### LLM Article Generation
+---
+
+## 3. RumorEvidence Entity
+
+Track evidence for and against rumors:
 
 ```csharp
-public async Task<NewsArticle> GenerateArticleAsync(Guid newsAccountId, NewsLead lead)
+public class RumorEvidence
 {
-    var newsAccount = await _newsAccountRepo.GetAsync(newsAccountId);
-    var account = await _accountRepo.GetAsync(newsAccount.AccountId);
+    public Guid Id { get; set; }
+    public Guid RumorId { get; set; }
+    public Guid AccountId { get; set; }                  // Who provided evidence
     
-    var prompt = BuildArticlePrompt(newsAccount, lead);
+    // Evidence type
+    public EvidenceType Type { get; set; }               // See enum
+    public bool SupportsRumor { get; set; }              // True = supports, False = contradicts
     
-    var llmResult = await _aiService.GenerateTextAsync(prompt);
+    // Content
+    public string Description { get; set; }
+    public Guid? RelatedPostId { get; set; }             // Post with evidence
+    public Guid? RelatedEventId { get; set; }            // Event as evidence
+    public Guid? RelatedAccountId { get; set; }          // Account testimony
     
-    if (!llmResult.Success)
+    // Credibility
+    public float Credibility { get; set; }               // 0.0 - 1.0
+    public EvidenceStrength Strength { get; set; }       // See enum
+    
+    // Verification
+    public bool IsVerified { get; set; }                 // Has it been checked?
+    public Guid? VerifiedByAccountId { get; set; }
+    public DateTime? VerifiedAt { get; set; }
+    
+    public DateTime CreatedAt { get; set; }
+}
+
+public enum EvidenceType
+{
+    Post,                 // A post contains evidence
+    Comment,              // A comment provides evidence
+    Photo,                // Photo evidence
+    Screenshot,           // Screenshot evidence
+    Testimony,            // Someone's statement
+    Event,                // An event proves/disproves
+    Contradiction,        // Contradicts other evidence
+    Verification          // Official verification
+}
+
+public enum EvidenceStrength
+{
+    Weak = 1,             // Circumstantial
+    Moderate = 2,         // Suggestive
+    Strong = 3,           // Compelling
+    Definitive = 4       // Proves/disproves
+}
+```
+
+---
+
+## 4. Rumor Service
+
+### IRumorService
+
+```csharp
+public interface IRumorService
+{
+    // Creation
+    Task<Rumor> CreateRumorAsync(RumorCreationRequest request);
+    Task<Rumor> CreateRumorFromPostAsync(Guid postId, Guid spreadingAccountId);
+    
+    // Queries
+    Task<Rumor?> GetRumorAsync(Guid rumorId);
+    Task<List<Rumor>> GetActiveRumorsAsync(int count = 20);
+    Task<List<Rumor>> GetRumorsByTopicAsync(string topic, int count = 20);
+    Task<List<Rumor>> GetRumorsAboutAccountAsync(Guid accountId);
+    
+    // Beliefs
+    Task<AccountBelief?> GetBeliefAsync(Guid accountId, Guid rumorId);
+    Task<List<AccountBelief>> GetAccountBeliefsAsync(Guid accountId);
+    Task<AccountBelief> UpdateBeliefAsync(Guid accountId, Guid rumorId, BeliefLevel belief);
+    
+    // Evidence
+    Task<RumorEvidence> AddEvidenceAsync(Guid rumorId, AddEvidenceRequest request);
+    Task<List<RumorEvidence>> GetEvidenceAsync(Guid rumorId);
+    
+    // Truth
+    Task ConfirmRumorAsync(Guid rumorId, Guid confirmedBy, string evidence);
+    Task DebunkRumorAsync(Guid rumorId, Guid debunkedBy, string evidence);
+    
+    // Processing
+    Task ProcessRumorsTickAsync();
+}
+```
+
+---
+
+## 5. Rumor Creation
+
+### How Rumors Start
+
+Rumors can originate from:
+
+1. **NPC-initiated** — NPCs with high GossipTendency spread rumors
+2. **Event-driven** — Events trigger rumors about participants
+3. **Post-based** — A viral/engaging post becomes rumor content
+4. **Deliberate plants** — NPCs deliberately spread false information
+5. **LLM-generated** — LLM proposes rumors based on social context
+
+### Rumor Creation from NPC Behavior
+
+```csharp
+public async Task<Rumor?> TryCreateRumorAsync(Guid npcId)
+{
+    var npc = await _npcService.GetAsync(npcId);
+    
+    // Only gossipy NPCs spread rumors
+    if (npc.Personality.GossipTendency < 0.3) return null;
+    
+    // Probability based on gossip tendency
+    var createProb = npc.Personality.GossipTendency * 0.01; // Max 1% per tick
+    if (Random.NextDouble() > createProb) return null;
+    
+    // Find a subject (other account)
+    var potentialSubjects = await _accountService.GetAccountsForGossipAsync(npcId);
+    if (!potentialSubjects.Any()) return null;
+    
+    var subject = potentialSubjects.RandomElement();
+    
+    // Generate rumor content with LLM
+    var rumorContent = await GenerateRumorContentAsync(npc, subject);
+    
+    var rumor = new Rumor
     {
-        // Fallback to template-based generation
-        return GenerateTemplateArticle(newsAccountId, lead);
+        Subject = rumorContent.Subject,
+        Description = rumorContent.Description,
+        SubjectAccountId = subject.Id,
+        Type = rumorContent.Type,
+        Topic = rumorContent.Topic,
+        TruthStatus = RumorTruthStatus.Unknown,
+        TruthConfidence = 0.5f,
+        OriginAccountId = npcId,
+        OriginDate = DateTime.UtcNow,
+        IsPlant = false,
+        Status = RumorStatus.Active,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
+    };
+    
+    await _rumorRepo.CreateAsync(rumor);
+    
+    return rumor;
+}
+
+public async Task<RumorContent> GenerateRumorContentAsync(Npc npc, Account subject)
+{
+    var prompt = $@"You are generating a rumor that NPC '{npc.DisplayName}' might spread about '{subject.DisplayName}'.
+
+NPC Personality: {npc.Personality}
+NPC Interests: {string.Join(", ", npc.Interests.Select(i => i.Name))}
+Subject Profile: {subject.DisplayName} - {subject.Bio}
+
+Generate a plausible rumor that:
+- Involves the subject account
+- Is something a gossipy person might share
+- Could be true or false (keep actual truth secret)
+- Is dramatic enough to spread
+
+Return as JSON:
+{{
+  "subject": "What the rumor is about",
+  "description": "The rumor content",
+  "type": "Gossip/Scandal/Relationship/etc",
+  "topic": "Related topic"
+}}";
+
+    var result = await _aiService.GenerateTextAsync(prompt);
+    
+    if (!result.Success) return GenerateTemplateRumor(npc, subject);
+    
+    return ParseRumorContent(result.Text);
+}
+```
+
+---
+
+## 6. Belief System
+
+### How Beliefs Form
+
+Accounts form beliefs based on:
+
+1. **Source Credibility** — Who told them
+2. **Network Position** — Friends vs strangers
+3. **Prior Beliefs** — Consistent with existing views
+4. **Evidence** — Supporting or contradicting evidence
+5. **Account Traits** — Credulity vs skepticism
+
+### Belief Calculation
+
+```csharp
+public float CalculateInitialBelief(Guid accountId, Rumor rumor, BeliefSource source, Guid sourceAccountId)
+{
+    var baseBelief = 0.5f; // Start neutral
+    
+    // Source credibility modifier
+    var sourceCredibility = GetSourceCredibility(source);
+    baseBelief += sourceCredibility;
+    
+    // Relationship with source (trust)
+    var relationship = _socialGraphService.GetRelationship(accountId, sourceAccountId);
+    var trustModifier = (relationship?.Trust ?? 50) / 200.0; // -0.25 to +0.25
+    baseBelief += trustModifier;
+    
+    // Account personality
+    var account = _accountService.Get(accountId);
+    if (account.NpcProfile?.Personality.Credulity > 0.7) baseBelief += 0.1f;
+    if (account.NpcProfile?.Personality.Skepticism > 0.7) baseBelief -= 0.1f;
+    
+    // Topic relevance (care more about things they care about)
+    if (account.Interests.Contains(rumor.Topic)) baseBelief += 0.05f;
+    
+    // Clamp to 0-1
+    return Math.Clamp(baseBelief, 0f, 1f);
+}
+
+public BeliefLevel CalculateBeliefLevel(float beliefValue)
+{
+    return beliefValue switch
+    {
+        > 0.85f => BeliefLevel.StronglyBelieves,
+        > 0.65f => BeliefLevel.Believes,
+        > 0.35f => BeliefLevel.Uncertain,
+        > 0.15f => BeliefLevel.Doubts,
+        _ => BeliefLevel.StronglyDoubts
+    };
+}
+
+public double GetSourceCredibility(BeliefSource source)
+{
+    return source switch
+    {
+        BeliefSource.DirectWitness => 0.3,     // +30% if you saw it
+        BeliefSource.TrustedFriend => 0.2,     // +20% from friend
+        BeliefSource.News => 0.15,            // +15% from news
+        BeliefSource.Post => 0.0,             // Neutral from post
+        BeliefSource.Trend => -0.05,          // -5% from trend
+        _ => 0.0
+    };
+}
+```
+
+---
+
+## 7. Rumor Spread Mechanics
+
+### How Rumors Propagate
+
+```csharp
+public async Task ProcessRumorSpreadAsync(Guid rumorId)
+{
+    var rumor = await _rumorRepo.GetAsync(rumorId);
+    if (rumor.Status != RumorStatus.Active) return;
+    
+    // Get accounts who might spread this rumor
+    var potentialSpreaders = await GetPotentialSpreadersAsync(rumorId);
+    
+    foreach (var accountId in potentialSpreaders)
+    {
+        var spreadProb = CalculateSpreadProbabilityAsync(accountId, rumor);
+        
+        if (Random.NextDouble() < spreadProb)
+        {
+            // Account becomes aware and forms belief
+            var beliefValue = CalculateInitialBelief(accountId, rumor, BeliefSource.Post, rumor.OriginAccountId);
+            var beliefLevel = CalculateBeliefLevel(beliefValue);
+            
+            await CreateBeliefAsync(accountId, rumorId, beliefLevel, BeliefSource.Post);
+            
+            // Update rumor metrics
+            rumor.TotalMentions++;
+            if (beliefLevel >= BeliefLevel.Believes)
+                rumor.BelieverCount++;
+            else if (beliefLevel <= BeliefLevel.Doubts)
+                rumor.DoubterCount++;
+            
+            // Account might reshare
+            if (beliefLevel >= BeliefLevel.Believes && Random.NextDouble() < 0.3)
+            {
+                await _postService.CreateRumorPostAsync(accountId, rumor);
+            }
+        }
     }
     
-    var content = llmResult.Text;
-    var (headline, summary, body) = ParseArticleContent(content);
+    await _rumorRepo.UpdateAsync(rumor);
+}
+
+public async Task<double> CalculateSpreadProbabilityAsync(Guid accountId, Rumor rumor)
+{
+    var account = await _accountService.GetAsync(accountId);
     
-    var article = new NewsArticle
+    // Base probability
+    var baseProb = 0.02; // 2% base
+    
+    // Gossip tendency - higher = more likely to spread
+    var gossipBoost = (account.NpcProfile?.Personality.GossipTendency ?? 0) / 100.0;
+    
+    // Drama tendency - dramatic rumors spread more
+    var dramaBoost = (account.NpcProfile?.Personality.DramaTendency ?? 0) / 200.0;
+    
+    // Connected to subject - more likely to care
+    var connectedBoost = await _socialGraphService.IsConnectedToAsync(accountId, rumor.SubjectAccountId) ? 0.05 : 0;
+    
+    // Topic interest
+    var topicBoost = account.Interests.Contains(rumor.Topic) ? 0.03 : 0;
+    
+    // Trending boost
+    var trendBoost = await _trendService.IsTrendingAsync(rumor.Topic) ? 0.1 : 0;
+    
+    // Already believes - more likely to spread
+    var belief = await GetBeliefAsync(accountId, rumor.Id);
+    var beliefBoost = belief?.Belief switch
     {
-        NewsAccountId = newsAccountId,
-        Headline = headline,
-        Summary = summary,
-        Body = body,
-        Category = GetCategoryFromLead(lead),
-        Type = lead.Type == NewsLeadType.FactCheck ? ArticleType.FactCheck : ArticleType.Report,
-        IsBreakingNews = lead.Priority > 0.8,
-        Status = ArticleStatus.Published,
-        PublishedAt = DateTime.UtcNow,
+        BeliefLevel.StronglyBelieves => 0.2,
+        BeliefLevel.Believes => 0.1,
+        BeliefLevel.Uncertain => 0.0,
+        _ => -0.1
+    };
+    
+    return Math.Min(0.9, baseProb + gossipBoost + dramaBoost + connectedBoost + topicBoost + trendBoost + beliefBoost);
+}
+```
+
+---
+
+## 8. Evidence and Truth Emergence
+
+### Adding Evidence
+
+```csharp
+public async Task<RumorEvidence> AddEvidenceAsync(Guid rumorId, AddEvidenceRequest request)
+{
+    var evidence = new RumorEvidence
+    {
+        RumorId = rumorId,
+        AccountId = request.AccountId,
+        Type = request.Type,
+        SupportsRumor = request.SupportsRumor,
+        Description = request.Description,
+        RelatedPostId = request.RelatedPostId,
+        RelatedEventId = request.RelatedEventId,
+        RelatedAccountId = request.RelatedAccountId,
+        Strength = request.Strength,
+        Credibility = CalculateEvidenceCredibility(request),
         CreatedAt = DateTime.UtcNow
     };
     
-    // Set covered entities
-    if (lead.RumorId.HasValue) article.CoveredRumorId = lead.RumorId;
-    if (lead.EventId.HasValue) article.CoveredEventId = lead.EventId;
+    await _evidenceRepo.CreateAsync(evidence);
     
-    await _articleRepo.CreateAsync(article);
+    // Update rumor
+    var rumor = await _rumorRepo.GetAsync(rumorId);
+    if (request.SupportsRumor)
+        rumor.SupportingEvidenceCount++;
+    else
+        rumor.ContradictingEvidenceCount++;
     
-    // Update news account stats
-    newsAccount.ArticlesPublished++;
-    newsAccount.TotalArticleViews += article.Views;
-    await _newsAccountRepo.UpdateAsync(newsAccount);
+    await UpdateTruthConfidenceAsync(rumor);
+    await UpdateBeliefsAfterEvidenceAsync(rumorId, evidence);
+    await _rumorRepo.UpdateAsync(rumor);
     
-    return article;
+    return evidence;
 }
+```
 
-public string BuildArticlePrompt(NewsAccount newsAccount, NewsLead lead)
+### Truth Confidence Calculation
+
+```csharp
+public async Task UpdateTruthConfidenceAsync(Rumor rumor)
 {
-    var toneInstructions = newsAccount.Tone switch
-    {
-        NewsTone.Serious => "Use formal, professional language. Focus on facts.",
-        NewsTone.Casual => "Use conversational, friendly language. Keep it light.",
-        NewsTone.Sensational => "Use dramatic language. Emphasize the impact and importance.",
-        NewsTone.Balanced => "Present multiple perspectives fairly. Avoid bias.",
-        _ => ""
-    };
+    var supporting = rumor.SupportingEvidenceCount;
+    var contradicting = rumor.ContradictingEvidenceCount;
+    var total = supporting + contradicting;
     
-    var articleTypeInstructions = lead.Type switch
+    if (total == 0)
     {
-        NewsLeadType.FactCheck => "This is a fact-check article. Investigate the claim and provide verification.",
-        NewsLeadType.TrendCoverage => "Cover this trending topic. Why is it popular? What's the significance?",
-        NewsLeadType.ViralStory => "Report on this viral story. What happened? Who's involved?",
-        _ => "Write a standard news report on this topic."
-    };
+        rumor.TruthConfidence = 0.5f;
+        rumor.TruthStatus = RumorTruthStatus.Unknown;
+        return;
+    }
     
-    return $@"You are {newsAccount.NewsName}, a {newsAccount.Category} news outlet.
-Tone: {toneInstructions}
-
-{articleTypeInstructions}
-
-Topic: {lead.Headline}
-
-Generate a news article with:
-- Headline: Catchy but accurate
-- Summary: 2-3 sentences summarizing the story
-- Body: 3-5 paragraphs of detailed coverage
-
-Format your response as:
-HEADLINE: [your headline]
-SUMMARY: [your summary]
-BODY:
-[your article body]
-
-Keep the article informative and appropriate for a social media platform.";
+    // Weight by evidence strength (simplified)
+    var supportingWeight = supporting * 1.0;
+    var contradictingWeight = contradicting * 1.0;
+    var ratio = supportingWeight / (supportingWeight + contradictingWeight);
+    
+    if (ratio > 0.7f && total >= 3)
+    {
+        rumor.TruthConfidence = (ratio + 0.5f) / 2;
+        rumor.TruthStatus = RumorTruthStatus.LikelyTrue;
+    }
+    else if (ratio < 0.3f && total >= 3)
+    {
+        rumor.TruthConfidence = (1 - ratio + 0.5f) / 2;
+        rumor.TruthStatus = RumorTruthStatus.LikelyFalse;
+    }
+    else if (total >= 5)
+    {
+        rumor.TruthStatus = ratio > 0.5 ? RumorTruthStatus.LikelyTrue : RumorTruthStatus.LikelyFalse;
+        rumor.TruthConfidence = 0.6f;
+    }
+    else
+    {
+        rumor.TruthConfidence = 0.5f;
+        rumor.TruthStatus = RumorTruthStatus.Unknown;
+    }
+    
+    await _rumorRepo.UpdateAsync(rumor);
 }
 ```
 
 ---
 
-## 5. News Feed Integration
+## 9. Rumor Lifecycle Processing
 
-News articles appear in regular feeds:
+### Tick Processing
 
 ```csharp
-public async Task<List<Post>> GetFeedAsync(Guid accountId, int count)
+public async Task ProcessRumorsTickAsync()
 {
-    var regularFeed = await _feedService.GetFeedAsync(accountId, count);
-    var newsArticles = await GetNewsForFeedAsync(accountId, count / 4); // 25% news
+    var activeRumors = await _rumorRepo.GetActiveAsync();
     
-    // Interleave news with regular posts
-    var combined = new List<Post>();
-    var newsIndex = 0;
-    
-    for (int i = 0; i < regularFeed.Count && combined.Count < count; i++)
+    foreach (var rumor in activeRumors)
     {
-        combined.Add(regularFeed[i]);
+        // 1. Spread to new accounts
+        await ProcessRumorSpreadAsync(rumor.Id);
         
-        // Insert news every 4 posts
-        if ((i + 1) % 4 == 0 && newsIndex < newsArticles.Count)
+        // 2. Check for lifecycle transitions
+        await ProcessRumorLifecycleAsync(rumor);
+        
+        // 3. Update trends (rumors can trend)
+        await UpdateRumorTrendsAsync(rumor);
+    }
+}
+```
+
+### Lifecycle Transitions
+
+```csharp
+public async Task ProcessRumorLifecycleAsync(Rumor rumor)
+{
+    // Stalling check
+    if (rumor.Status == RumorStatus.Active)
+    {
+        var recentMentions = await _rumorRepo.GetMentionsSinceAsync(rumor.Id, DateTime.UtcNow.AddDays(-1));
+        
+        if (recentMentions < 3)
         {
-            combined.Add(newsArticles[newsIndex]);
-            newsIndex++;
+            rumor.Status = RumorStatus.Stalling;
+            await _rumorRepo.UpdateAsync(rumor);
         }
     }
     
-    return combined;
-}
-```
-
----
-
-## 6. Cross-Community Exposure
-
-News reaches beyond the original community:
-
-```csharp
-public async Task PropagateNewsAsync(Guid articleId)
-{
-    var article = await _articleRepo.GetAsync(articleId);
-    var communities = await _communityService.GetAllAsync();
-    
-    // Find relevant communities
-    var relevantCommunities = communities
-        .Where(c => c.Topics.Any(t => article.Tags.Contains(t)))
-        .OrderByDescending(c => c.MemberCount)
-        .Take(10)
-        .ToList();
-    
-    foreach (var community in relevantCommunities)
+    // Death check
+    if (rumor.Status == RumorStatus.Stalling)
     {
-        // Notify community members about news
-        await _notificationService.CreateBulkAsync(community.MemberIds, new Notification
-        {
-            Type = NotificationType.NewsFromFavoriteSource,
-            Title = article.Headline,
-            RelatedArticleId = article.Id
-        });
+        var recentMentions = await _rumorRepo.GetMentionsSinceAsync(rumor.Id, DateTime.UtcNow.AddDays(-2));
         
-        // Record exposure
-        await _exposureRepo.RecordAsync(new NewsExposure
+        if (recentMentions < 2)
         {
-            ArticleId = articleId,
-            CommunityId = community.Id,
-            Views = 0 // Will be updated when members view
-        });
+            rumor.Status = RumorStatus.Died;
+            rumor.DiedAt = DateTime.UtcNow;
+            await _rumorRepo.UpdateAsync(rumor);
+        }
     }
 }
 ```
 
 ---
 
-## 7. News Processing Tick
+## 10. NPC Deliberate Rumor Plants
+
+Some NPCs deliberately spread false information:
 
 ```csharp
-public class NewsProcessingService : BackgroundService
+public async Task ProcessRumorPlantsAsync()
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    var manipulators = await _npcService.GetByTraitAsync("ManipulationTendency", min: 0.6);
+    
+    foreach (var npc in manipulators)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        // High manipulation NPCs occasionally plant rumors
+        if (Random.NextDouble() < npc.Personality.ManipulationTendency * 0.005)
         {
-            await ProcessNewsTickAsync();
-            await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+            await PlantRumorAsync(npc);
         }
     }
 }
 
-public async Task ProcessNewsTickAsync()
-{
-    // 1. Detect newsworthy events
-    var leads = await DetectNewsWorthyEventsAsync();
-    
-    // 2. Assign leads to news accounts
-    var newsAccounts = await _newsAccountRepo.GetActiveAsync();
-    
-    foreach (var lead in leads.Take(10))
-    {
-        // Find best matching news account
-        var newsAccount = FindBestMatch(newsAccounts, lead);
-        
-        if (newsAccount != null && ShouldGenerateArticle(newsAccount))
-        {
-            await GenerateArticleAsync(newsAccount.Id, lead);
-            
-            // Propagate to communities
-            var article = await _articleRepo.GetLatestForAccountAsync(newsAccount.Id);
-            await PropagateNewsAsync(article.Id);
-        }
-    }
-}
-
-public bool ShouldGenerateArticle(NewsAccount account)
-{
-    var recentArticles = await _articleRepo.GetRecentForAccountAsync(
-        account.Id, since: DateTime.UtcNow.AddHours(1));
-    
-    return recentArticles.Count < account.ReportFrequency;
-}
-```
-
----
-
-## 8. NPC News Consumption
-
-NPCs read and react to news:
-
-```csharp
-public async Task ProcessNpcNewsReactionAsync(Guid npcId)
+public async Task PlantRumorAsync(Guid npcId)
 {
     var npc = await _npcService.GetAsync(npcId);
-    var newsFeed = await _newsService.GetFeedAsync(npc.AccountId, 5);
     
-    foreach (var news in newsFeed)
+    // Find a target (rival, enemy, or random)
+    var target = await _accountService.GetRumorTargetAsync(npcId);
+    if (target == null) return;
+    
+    // Create deliberately false rumor
+    var rumor = new Rumor
     {
-        // NPCs might share news
-        if (npc.Personality.SharingTendency > 0.5 && Random.NextDouble() < 0.3)
-        {
-            var shareChance = CalculateShareChance(npc, news);
-            if (Random.NextDouble() < shareChance)
-            {
-                await _postService.ShareArticleAsync(npc.AccountId, news.Id);
-            }
-        }
-        
-        // NPCs might comment on news
-        if (npc.Personality.DebateTendency > 0.3 && Random.NextDouble() < 0.1)
-        {
-            await _commentService.AddNewsCommentAsync(npc.AccountId, news.Id);
-        }
+        Subject = $"{target.DisplayName} did something bad",
+        Description = "A potentially false accusation",
+        SubjectAccountId = target.Id,
+        TruthStatus = RumorTruthStatus.Unknown,
+        TruthConfidence = 0.0f, // Deliberately false
+        OriginAccountId = npcId,
+        IsPlant = true,
+        PlantingAccountId = npcId,
+        Status = RumorStatus.Active,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
+    };
+    
+    await _rumorRepo.CreateAsync(rumor);
+    
+    // Immediately spread to a few accounts
+    var initialSpreaders = await _accountService.GetConnectedAccountsAsync(npcId, count: 5);
+    foreach (var spreader in initialSpreaders)
+    {
+        await CreateBeliefAsync(spreader.Id, rumor.Id, BeliefLevel.Believes, BeliefSource.CasualContact);
     }
 }
 ```
 
 ---
 
-## 9. News API Endpoints
+## 11. News-Rumor Integration
 
-### News Account Endpoints
+News accounts can cover rumors:
 
-```http
-GET /api/news/accounts
+```csharp
+public async Task ProcessNewsRumorCoverageAsync()
+{
+    // Find rumors that need coverage
+    var hotRumors = await _rumorRepo.GetActiveAsync()
+        .Where(r => r.BelieverCount >= 10 && r.PostCount >= 5)
+        .OrderByDescending(r => r.BelieverCount)
+        .Take(5)
+        .ToListAsync();
+    
+    foreach (var rumor in hotRumors)
+    {
+        // Check if already covered
+        if (await _newsService.HasFactCheckAsync(rumor.Id)) continue;
+        
+        // Assign to appropriate news account
+        var newsAccount = await _newsService.GetBestMatchAsync(rumor.Topic);
+        if (newsAccount == null) continue;
+        
+        // Generate fact-check article
+        await _newsService.GenerateFactCheckAsync(newsAccount.Id, rumor);
+    }
+}
 ```
-Returns all news accounts.
-
-```http
-GET /api/news/accounts/{id}
-```
-Returns news account details.
-
-### News Article Endpoints
-
-```http
-GET /api/news?cursor={cursor}&pageSize={size}
-```
-Returns latest news articles.
-
-```http
-GET /api/news/{id}
-```
-Returns article details.
-
-```http
-GET /api/news/breaking
-```
-Returns breaking news.
-
-```http
-GET /api/news/trending
-```
-Returns trending news.
-
-### News by Category
-
-```http
-GET /api/news/category/{category}
-```
-Returns news for a specific category.
-
-### News by Topic
-
-```http
-GET /api/news/topic/{topic}
-```
-Returns news about a topic.
 
 ---
 
-## 10. Database Migration
+## 12. Rumor API Endpoints
 
-### NewsAccounts Table
-
-```sql
-CREATE TABLE NewsAccounts (
-    Id TEXT PRIMARY KEY,
-    AccountId TEXT NOT NULL UNIQUE,
-    NewsName TEXT NOT NULL,
-    NewsTagline TEXT,
-    NewsBio TEXT,
-    Category INTEGER NOT NULL,
-    CredibilityScore INTEGER NOT NULL DEFAULT 50,
-    SubscriberCount INTEGER NOT NULL DEFAULT 0,
-    ArticlesPublished INTEGER NOT NULL DEFAULT 0,
-    TotalArticleViews INTEGER NOT NULL DEFAULT 0,
-    AccuracyRating REAL NOT NULL DEFAULT 0.5,
-    BreakingNewsCount INTEGER NOT NULL DEFAULT 0,
-    Tone INTEGER NOT NULL,
-    ReportFrequency INTEGER NOT NULL DEFAULT 2,
-    IsActive INTEGER NOT NULL DEFAULT 1,
-    IsVerified INTEGER NOT NULL DEFAULT 0,
-    CreatedAt TEXT NOT NULL,
-    UpdatedAt TEXT NOT NULL,
-    FOREIGN KEY (AccountId) REFERENCES Accounts(Id)
-);
-
-CREATE INDEX IX_NewsAccounts_Category ON NewsAccounts(Category);
-CREATE INDEX IX_NewsAccounts_IsVerified ON NewsAccounts(IsVerified);
+### Get Active Rumors
+```http
+GET /api/rumors?cursor={cursor}&pageSize={size}
 ```
 
-### NewsArticles Table
+### Get Rumor Details
+```http
+GET /api/rumors/{id}
+```
+Returns rumor with beliefs, evidence, and related posts.
+
+### Get My Beliefs
+```http
+GET /api/me/beliefs
+```
+Returns current account's beliefs about rumors.
+
+### Get Beliefs for Account
+```http
+GET /api/accounts/{id}/beliefs
+```
+
+### Get Rumor Evidence
+```http
+GET /api/rumors/{id}/evidence
+```
+
+### Get Rumors About Account
+```http
+GET /api/accounts/{id}/rumors
+```
+Returns active rumors about this account.
+
+### Add Evidence
+```http
+POST /api/rumors/{id}/evidence
+{
+  "accountId": "...",
+  "type": "Post",
+  "supportsRumor": true,
+  "description": "...",
+  "relatedPostId": "..."
+}
+```
+
+### Confirm/Debunk Rumor
+```http
+POST /api/rumors/{id}/confirm
+{
+  "confirmedBy": "...",
+  "evidence": "..."
+}
+
+POST /api/rumors/{id}/debunk
+{
+  "debunkedBy": "...",
+  "evidence": "..."
+}
+```
+
+---
+
+## 13. Database Migration
+
+### Rumors Table
 
 ```sql
-CREATE TABLE NewsArticles (
+CREATE TABLE Rumors (
     Id TEXT PRIMARY KEY,
-    NewsAccountId TEXT NOT NULL,
-    Headline TEXT NOT NULL,
-    Summary TEXT,
-    Body TEXT,
-    ImagePrompt TEXT,
-    Tags TEXT, -- JSON array
-    Category INTEGER NOT NULL,
+    Subject TEXT NOT NULL,
+    Description TEXT,
+    SubjectAccountId TEXT NOT NULL,
+    TruthStatus INTEGER NOT NULL DEFAULT 0,
+    TruthConfidence REAL NOT NULL DEFAULT 0.5,
+    OriginAccountId TEXT NOT NULL,
+    OriginDate TEXT NOT NULL,
+    OriginPostId TEXT,
     Type INTEGER NOT NULL,
-    CoveredTopicId TEXT,
-    CoveredRumorId TEXT,
-    CoveredEventId TEXT,
-    CoveredAccountIds TEXT, -- JSON array
-    Views INTEGER NOT NULL DEFAULT 0,
-    Shares INTEGER NOT NULL DEFAULT 0,
-    Comments INTEGER NOT NULL DEFAULT 0,
-    BreakingNewsBonus INTEGER NOT NULL DEFAULT 0,
+    Topic TEXT,
+    BelieverCount INTEGER NOT NULL DEFAULT 0,
+    DoubterCount INTEGER NOT NULL DEFAULT 0,
+    TotalMentions INTEGER NOT NULL DEFAULT 0,
+    PostCount INTEGER NOT NULL DEFAULT 0,
+    SupportingEvidenceCount INTEGER NOT NULL DEFAULT 0,
+    ContradictingEvidenceCount INTEGER NOT NULL DEFAULT 0,
+    IsPlant INTEGER NOT NULL DEFAULT 0,
+    PlantingAccountId TEXT,
     Status INTEGER NOT NULL DEFAULT 0,
-    IsBreakingNews INTEGER NOT NULL DEFAULT 0,
-    IsVerified INTEGER NOT NULL DEFAULT 0,
-    PublishedAt TEXT,
+    ConfirmedAt TEXT,
+    DebunkedAt TEXT,
+    DiedAt TEXT,
     CreatedAt TEXT NOT NULL,
-    UpdatedAt TEXT NOT NULL,
-    FOREIGN KEY (NewsAccountId) REFERENCES NewsAccounts(Id)
+    UpdatedAt TEXT NOT NULL
 );
 
-CREATE INDEX IX_NewsArticles_NewsAccountId ON NewsArticles(NewsAccountId);
-CREATE INDEX IX_NewsArticles_Category ON NewsArticles(Category);
-CREATE INDEX IX_NewsArticles_PublishedAt ON NewsArticles(PublishedAt DESC);
-CREATE INDEX IX_NewsArticles_IsBreaking ON NewsArticles(IsBreakingNews);
-CREATE INDEX IX_NewsArticles_Status ON NewsArticles(Status);
+CREATE INDEX IX_Rumors_Status ON Rumors(Status);
+CREATE INDEX IX_Rumors_SubjectAccountId ON Rumors(SubjectAccountId);
+CREATE INDEX IX_Rumors_Topic ON Rumors(Topic);
+CREATE INDEX IX_Rumors_TruthStatus ON Rumors(TruthStatus);
+CREATE INDEX IX_Rumors_IsPlant ON Rumors(IsPlant);
 ```
 
-### NewsExposure Table (for cross-community reach)
+### AccountBeliefs Table
 
 ```sql
-CREATE TABLE NewsExposures (
+CREATE TABLE AccountBeliefs (
     Id TEXT PRIMARY KEY,
-    ArticleId TEXT NOT NULL,
-    CommunityId TEXT NOT NULL,
-    Views INTEGER NOT NULL DEFAULT 0,
-    ExposedAt TEXT NOT NULL,
-    FOREIGN KEY (ArticleId) REFERENCES NewsArticles(Id),
-    FOREIGN KEY (CommunityId) REFERENCES Communities(Id)
+    AccountId TEXT NOT NULL,
+    RumorId TEXT NOT NULL,
+    Belief INTEGER NOT NULL,
+    Confidence REAL NOT NULL DEFAULT 0.5,
+    Source INTEGER NOT NULL,
+    SourceAccountId TEXT,
+    SourcePostId TEXT,
+    ChangedMind INTEGER NOT NULL DEFAULT 0,
+    PreviousBeliefDate TEXT,
+    PreviousBelief INTEGER,
+    TimesShared INTEGER NOT NULL DEFAULT 0,
+    TimesCommented INTEGER NOT NULL DEFAULT 0,
+    CreatedAt TEXT NOT NULL,
+    UpdatedAt TEXT NOT NULL,
+    UNIQUE(AccountId, RumorId)
 );
 
-CREATE INDEX IX_NewsExposures_ArticleId ON NewsExposures(ArticleId);
+CREATE INDEX IX_AccountBeliefs_AccountId ON AccountBeliefs(AccountId);
+CREATE INDEX IX_AccountBeliefs_RumorId ON AccountBeliefs(RumorId);
+```
+
+### RumorEvidence Table
+
+```sql
+CREATE TABLE RumorEvidence (
+    Id TEXT PRIMARY KEY,
+    RumorId TEXT NOT NULL,
+    AccountId TEXT NOT NULL,
+    Type INTEGER NOT NULL,
+    SupportsRumor INTEGER NOT NULL,
+    Description TEXT,
+    RelatedPostId TEXT,
+    RelatedEventId TEXT,
+    RelatedAccountId TEXT,
+    Credibility REAL NOT NULL DEFAULT 0.5,
+    Strength INTEGER NOT NULL DEFAULT 1,
+    IsVerified INTEGER NOT NULL DEFAULT 0,
+    VerifiedByAccountId TEXT,
+    VerifiedAt TEXT,
+    CreatedAt TEXT NOT NULL
+);
+
+CREATE INDEX IX_RumorEvidence_RumorId ON RumorEvidence(RumorId);
+CREATE INDEX IX_RumorEvidence_SupportsRumor ON RumorEvidence(SupportsRumor);
 ```
 
 ---
 
-## 11. Tests
+## 14. Tests
 
-### News Account Tests
-
+### Rumor Tests
 ```text
-News accounts seeded on startup
-News accounts have correct categories
-News accounts can be retrieved
+Rumors can be created
+Rumor truth status updates with evidence
+Rumor dies when engagement drops
+Rumor confirms/debunks correctly
+NPC plants are created correctly
 ```
 
-### Article Generation Tests
-
+### Belief Tests
 ```text
-Articles generated for trends
-Articles generated for viral posts
-Articles generated for rumors (fact-checks)
-Articles have correct tone/style
-LLM fallback works when needed
+Beliefs form correctly from spread
+Source credibility affects belief
+Relationship affects belief
+Personality affects belief
+Beliefs update with new evidence
+Beliefs persist correctly
 ```
 
-### News Feed Tests
-
+### Spread Tests
 ```text
-News appears in regular feed
-News interleaved correctly
-Category filtering works
-Breaking news appears first
+Rumors spread to connected accounts
+Gossip tendency increases spread
+Topic interest increases spread
+Trended rumors spread faster
+Plant rumors spread to initial targets
 ```
 
-### Cross-Community Tests
-
+### Evidence Tests
 ```text
-News propagates to relevant communities
-News exposure tracked
+Evidence updates truth confidence
+Evidence updates beliefs
+Strong evidence has more impact
+Verified evidence has more impact
+```
+
+### Lifecycle Tests
+```text
+Active rumors become stalling
+Stalling rumors die
+Confirmed rumors update status
+Debunked rumors update status
 ```
 
 ### API Tests
-
 ```text
-News endpoints return correct data
-Pagination works
-Category filtering works
+Rumor endpoints return correct data
+Belief endpoints work
+Evidence endpoints work
 ```
 
 ### Regression Tests
-
 ```text
 Existing Parts 01-21 tests still pass
 ```
 
 ---
 
-## 12. Android
+## 15. Android
 
-Part 22 is backend-focused. Ensure Android models include:
-- NewsArticle model with headline, summary, body
-- NewsAccount model
-
-No UI changes required for this part.
+Part 22 is backend-only. Minimal model adjustments only if needed.
 
 ---
 
-## 13. README — REQUIRED
+## 16. README — REQUIRED
 
 Document:
 - Part 22 completion
-- News account entity
-- News article entity
-- News generation process
-- News detection (trends, viral, rumors, events)
-- LLM article generation
-- Cross-community exposure
+- Rumor entity structure
+- Belief system
+- Evidence system
+- Rumor spread mechanics
+- Truth emergence
+- Rumor lifecycle
+- NPC rumor plants
+- News-rumor integration
 - API endpoints
 - Database changes
 - Tests performed
@@ -932,45 +1128,49 @@ Document:
 
 ---
 
-## 14. Git
+## 17. Git
 
 After implementation:
 1. Inspect `git status`
-2. Commit: `Implement news system (Part 22)`
+2. Commit: `Implement rumors and misinformation system (Part 22)`
 3. Push to `origin/main`
 4. Verify against origin
 
 ---
 
-## 15. DO NOT IMPLEMENT YET
+## 18. DO NOT IMPLEMENT YET
 
-- News comments or engagement
-- Breaking news alerts
-- News moderation
-- Paywalls or premium news
-- News image generation
+- Deep investigation mechanics
+- Paid disinformation campaigns
+- Moderation or removal of rumors
+- Platform-wide fact-checks
+- Rumor reporting flags
 
 ---
 
-## 16. QUALITY REQUIREMENTS
+## 19. QUALITY REQUIREMENTS
 
-- Correct (news generated appropriately)
-- Performant (batch processing)
+- Correct (beliefs calculate accurately)
+- Performant (batch rumor processing)
 - Testable
 - Permanent (all records persist)
-- Realistic (news feels authentic)
+- Realistic (rumors behave like real gossip)
 
 ---
 
-## 17. FINAL VERIFICATION
+## 20. FINAL VERIFICATION
 
 ```text
 Server builds
-News accounts seeded
-Articles generated for newsworthy events
-News appears in feed
-Cross-community exposure works
-News API returns data
+Rumors created from events and NPC behavior
+Beliefs form correctly
+Rumors spread through network
+Evidence updates truth
+Rumors can confirm/debunk
+Rumor lifecycle works
+NPC rumor plants work
+News-rumor integration works
+Rumor API returns data
 Database migrations applied
 Existing tests pass
 README updated
@@ -980,7 +1180,7 @@ Working tree clean
 
 ---
 
-## 18. FINAL SESSION REPORT
+## 21. FINAL SESSION REPORT
 
 ```text
 # PART 22 — COMPLETE
@@ -994,49 +1194,56 @@ Working tree clean
 ## 3. What Changed
 ...
 
-## 4. News Account Architecture
+## 4. Rumor Architecture
 ...
 
-## 5. News Article Architecture
+## 5. Belief System
 ...
 
-## 6. News Generation
+## 6. Evidence System
 ...
 
-## 7. News Detection
+## 7. Rumor Spread Mechanics
 ...
 
-## 8. Cross-Community Exposure
+## 8. Truth Emergence
 ...
 
-## 9. API Endpoints
+## 9. NPC Rumor Plants
 ...
 
-## 10. Database Changes
+## 10. News-Rumor Integration
 ...
 
-## 11. Tests
+## 11. API Endpoints
 ...
 
-## 12. README
+## 12. Database Changes
+...
+
+## 13. Tests
+...
+
+## 14. README
 Updated: YES
 ...
 
-## 13. Git
+## 15. Git
 Commit: ...
 Push: ...
 Verified: YES
 Working tree: clean
 
-## 14. Current Project Status
+## 16. Current Project Status
 01A-22 COMPLETE
 
-## 15. Intentionally Not Implemented
-- News image generation
-- Breaking news alerts
-- News moderation
+## 17. Intentionally Not Implemented
+- Deep investigation
+- Paid disinformation
+- Moderation
+- Platform fact-checks
 
-## 16. NEXT
+## 18. NEXT
 NEXT: PART 23 — Permanent Memory
 ```
 
