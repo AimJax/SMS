@@ -38,6 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IContentGeneratorService, ContentGeneratorService>();
         services.AddSingleton<INpcDecisionService, NpcDecisionService>();
         services.AddScoped<INpcBehaviorService, NpcBehaviorService>();
+        services.AddScoped<INpcSocialGraphService, NpcSocialGraphService>();
         
         // Register behavior configuration
         services.AddSingleton<NpcBehaviorConfig>(sp => new NpcBehaviorConfig

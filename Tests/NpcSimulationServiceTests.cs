@@ -128,10 +128,10 @@ public class NpcSimulationServiceTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act
-        var processedCount = await _simulationService.ProcessTickAsync(10);
+        var result = await _simulationService.ProcessTickAsync(10);
 
         // Assert
-        Assert.Equal(3, processedCount);
+        Assert.Equal(3, result.NpcsProcessed);
         
         // Verify all were processed
         var allNpcs = await _simulationService.GetDueNpcsAsync(10);
@@ -150,10 +150,10 @@ public class NpcSimulationServiceTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act - Process only 3
-        var processedCount = await _simulationService.ProcessTickAsync(3);
+        var result = await _simulationService.ProcessTickAsync(3);
 
         // Assert
-        Assert.Equal(3, processedCount);
+        Assert.Equal(3, result.NpcsProcessed);
         
         // Verify 2 remain due
         var remaining = await _simulationService.GetDueNpcsAsync(10);

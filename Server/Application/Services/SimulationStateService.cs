@@ -56,6 +56,11 @@ public interface ISimulationStateService
     /// Initialize with configuration
     /// </summary>
     void Initialize(SimulationConfig config);
+    
+    /// <summary>
+    /// Record follow/unfollow counts from a tick
+    /// </summary>
+    void RecordSocialGraphActivity(int follows, int unfollows);
 }
 
 /// <summary>
@@ -91,7 +96,11 @@ public class SimulationStateService : ISimulationStateService
                 LastTickNpcsProcessed = 0,
                 ServiceStartedAt = DateTime.UtcNow,
                 IsTickInProgress = false,
-                CurrentTickStartedAt = null
+                CurrentTickStartedAt = null,
+                TotalNpcFollows = 0,
+                TotalNpcUnfollows = 0,
+                LastTickFollows = 0,
+                LastTickUnfollows = 0
             };
             _isPaused = false;
             _tickInProgress = false;
@@ -213,6 +222,17 @@ public class SimulationStateService : ISimulationStateService
             _status.TotalTicksFailed++;
             _status.IsTickInProgress = false;
             _status.CurrentTickStartedAt = null;
+        }
+    }
+
+    public void RecordSocialGraphActivity(int follows, int unfollows)
+    {
+        lock (_lock)
+        {
+            _status.TotalNpcFollows += follows;
+            _status.TotalNpcUnfollows += unfollows;
+            _status.LastTickFollows = follows;
+            _status.LastTickUnfollows = unfollows;
         }
     }
 }

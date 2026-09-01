@@ -20,7 +20,7 @@ public interface INpcSimulationService
     /// <summary>
     /// Process simulation tick for all due NPCs
     /// </summary>
-    Task<int> ProcessTickAsync(int maxBatchSize = 100);
+    Task<SimulationTickResult> ProcessTickAsync(int maxBatchSize = 100);
     
     /// <summary>
     /// Update NPC after simulation
@@ -34,5 +34,7 @@ public interface INpcSimulationService
 public record SimulationTickResult(
     int NpcsProcessed,
     int NpcsSkipped,
+    int FollowsCreated,
+    int UnfollowsCreated,
     DateTime ProcessedAt
 );

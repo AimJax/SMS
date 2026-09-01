@@ -14,6 +14,7 @@ public class NpcBehaviorIntegrationTests : IDisposable
     private readonly ContentRelevanceService _relevanceService;
     private readonly ContentGeneratorService _contentGenerator;
     private readonly SocialGraphService _socialGraph;
+    private readonly NpcSocialGraphService _npcSocialGraph;
     private readonly NpcBehaviorConfig _config;
 
     public NpcBehaviorIntegrationTests()
@@ -26,7 +27,8 @@ public class NpcBehaviorIntegrationTests : IDisposable
         _relevanceService = new ContentRelevanceService();
         _contentGenerator = new ContentGeneratorService();
         _socialGraph = new SocialGraphService(_context);
-        _behaviorService = new NpcBehaviorService(_context, _relevanceService, _contentGenerator, _socialGraph);
+        _npcSocialGraph = new NpcSocialGraphService(_context, _relevanceService);
+        _behaviorService = new NpcBehaviorService(_context, _relevanceService, _contentGenerator, _socialGraph, _npcSocialGraph);
         
         _config = new NpcBehaviorConfig
         {

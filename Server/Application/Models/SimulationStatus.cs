@@ -79,4 +79,24 @@ public class SimulationStatus
     /// Timestamp when the current tick started (if in progress)
     /// </summary>
     public DateTime? CurrentTickStartedAt { get; set; }
+    
+    /// <summary>
+    /// Total NPC-to-NPC follow edges created since service start
+    /// </summary>
+    public long TotalNpcFollows { get; set; }
+    
+    /// <summary>
+    /// Total NPC-to-NPC unfollows since service start
+    /// </summary>
+    public long TotalNpcUnfollows { get; set; }
+    
+    /// <summary>
+    /// Number of follows in the last tick
+    /// </summary>
+    public int LastTickFollows { get; set; }
+    
+    /// <summary>
+    /// Number of unfollows in the last tick
+    /// </summary>
+    public int LastTickUnfollows { get; set; }
 }

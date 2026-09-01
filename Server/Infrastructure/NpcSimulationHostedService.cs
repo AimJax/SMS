@@ -70,13 +70,17 @@ public class NpcSimulationHostedService : BackgroundService
                     try
                     {
                         // Process the tick
-                        npcsProcessed = await simulationService.ProcessTickAsync(_config.MaxNpcsPerTick);
+                        var result = await simulationService.ProcessTickAsync(_config.MaxNpcsPerTick);
+                        npcsProcessed = result.NpcsProcessed;
+                        
+                        // Record social graph activity
+                        _stateService.RecordSocialGraphActivity(result.FollowsCreated, result.UnfollowsCreated);
                         
                         var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
                         _stateService.TickCompleted(npcsProcessed, duration);
                         
-                        _logger.LogInformation("Tick {TickNumber} completed. NPCs processed: {NpcsProcessed}, Duration: {Duration:F2}ms",
-                            tickNumber, npcsProcessed, duration);
+                        _logger.LogInformation("Tick {TickNumber} completed. NPCs processed: {NpcsProcessed}, Follows: {Follows}, Unfollows: {Unfollows}, Duration: {Duration:F2}ms",
+                            tickNumber, npcsProcessed, result.FollowsCreated, result.UnfollowsCreated, duration);
                     }
                     catch (Exception ex)
                     {

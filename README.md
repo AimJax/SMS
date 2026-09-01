@@ -22,8 +22,9 @@
 | 09 | NPC Population Generation | COMPLETE |
 | 10 | NPC Behavior Simulation | COMPLETE |
 | 11 | NPC Background Simulation | COMPLETE |
+| 12 | NPC Social Graph | COMPLETE |
 
-**NEXT: PART 12 — NPC Social Graph**
+**NEXT: PART 13 — LLM Content Generation**
 
 ## Architecture
 
@@ -633,8 +634,104 @@ All NPC actions are recorded in `NpcAction`:
 
 - **LLM Integration** — Ollama/Qwen NPC content generation (future part)
 - **NPC-Specific API** — Full admin NPC management CRUD endpoints (future part)
-- **NPC Social Graph** — NPC-to-NPC follows/relationships
 - **Android Simulation UI** — Client-side simulation control
+
+## NPC Social Graph
+
+### Overview
+NPCs make intelligent follow/unfollow decisions based on interests, personality, engagement history, and reciprocity. The social graph emerges organically from these decisions.
+
+### Architecture
+```
+NpcBehaviorService
+      ↓
+NpcSocialGraphService (Part 12)
+      ├── Interest-based candidates
+      ├── Reciprocity candidates
+      ├── Exploration candidates
+      └── Engagement-based candidates
+      ↓
+SocialGraphService (existing Part 05)
+      ↓
+Follow Entity (persisted)
+```
+
+### Candidate Selection Strategy
+The `GetFollowCandidatesAsync` method produces bounded candidates from four sources:
+
+| Source | Weight | Description |
+|--------|--------|-------------|
+| Interest-based | 50% | Accounts posting about matching interests |
+| Reciprocity | 30% | Accounts that follow the NPC but aren't followed back |
+| Engagement | Variable | Accounts whose posts the NPC has liked/commented |
+| Exploration | 10-30% | Random active accounts (driven by Openness trait) |
+
+**Bounds:** Max 50 interest candidates, 17 reciprocity, 12 engagement, variable exploration
+
+### Personality Influence on Following
+
+| Trait | Effect |
+|-------|--------|
+| Extraversion | +0.1 + bonus if >0.6 |
+| Openness | +0.1 |
+| Neuroticism | -0.1 |
+| Agreeableness >0.6 | +0.05 |
+
+### Personality Influence on Unfollowing
+
+| Trait | Effect |
+|-------|--------|
+| Neuroticism | +0.05 (more churn) |
+| Conscientiousness | +0.02 (prunes stale follows) |
+
+### Account Type Influence on Following
+
+| Type | Follow Modifier | Notes |
+|------|-----------------|-------|
+| OrdinaryUser | +0.25 | Follows more |
+| Creator | +0.20 | Follows within niche |
+| Influencer | +0.12 | Lower follow rate |
+| Celebrity | -0.20 | Rarely follows back |
+| Official | +0.15 | Follows for relevance |
+| News | +0.20 | Follows for sourcing |
+
+### Reciprocity (Follow-Back)
+When account A follows NPC B:
+- B's future ticks have increased chance to follow A back
+- Score = 0.2 base + 0.4×Agreeableness + 0.2×Extraversion + 0.1×Openness
+- Celebrity/Influencer types have penalty (-0.3/-0.2)
+- Ordinary users have bonus (+0.1)
+
+### Unfollow Rules
+NPCs unfollow accounts when:
+1. **Stale content:** Followed account hasn't posted in 48+ hours (+0.3)
+2. **Low engagement:** Followed account posts infrequently (+0.1)
+3. **Personality-driven churn:** High Neuroticism (+0.2×Neuroticism)
+4. **Conscientious pruning:** Long follows with low engagement (+0.1 if 90+ days)
+
+### Social Graph Rule Compliance
+All NPC-to-NPC follows go through existing `SocialGraphService`:
+- Cannot follow self
+- Cannot follow if blocked in either direction
+- Cannot follow if already following
+- Mutes/blocks respected
+
+### Observability
+Extended status endpoint includes:
+
+```json
+{
+  "totalNpcFollows": 1250,
+  "totalNpcUnfollows": 87,
+  "lastTickFollows": 12,
+  "lastTickUnfollows": 3
+}
+```
+
+### Performance
+- Bounded queries: Max 50-100 candidates per NPC per tick
+- Database indexes: Uses existing indexes on Follow, Post, Account tables
+- No full-table scans: All queries are targeted by interest, engagement, or recency
 
 ## NPC Background Simulation
 
@@ -1073,6 +1170,16 @@ $feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSi
 | Simulation tick lifecycle | PASS |
 | Simulation failure isolation | PASS |
 | Simulation disabled state | PASS |
+| NPC social graph candidates - exclude following | PASS |
+| NPC social graph candidates - exclude blocked | PASS |
+| NPC social graph candidates - exclude self | PASS |
+| NPC social graph - interest-based candidates | PASS |
+| NPC social graph - reciprocity candidates | PASS |
+| NPC social graph - unfollow stale follows | PASS |
+| NPC social graph - reciprocity score by agreeableness | PASS |
+| NPC social graph - reciprocity score by account type | PASS |
+| Simulation status social graph metrics | PASS |
+| Simulation tick result social graph data | PASS |
 
 ## License
 

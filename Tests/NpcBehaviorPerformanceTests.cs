@@ -21,7 +21,8 @@ public class NpcBehaviorPerformanceTests
         var relevanceService = new ContentRelevanceService();
         var contentGenerator = new ContentGeneratorService();
         var socialGraph = new SocialGraphService(context);
-        var behaviorService = new NpcBehaviorService(context, relevanceService, contentGenerator, socialGraph);
+        var npcSocialGraph = new NpcSocialGraphService(context, relevanceService);
+        var behaviorService = new NpcBehaviorService(context, relevanceService, contentGenerator, socialGraph, npcSocialGraph);
 
         var config = new NpcBehaviorConfig
         {
@@ -70,7 +71,8 @@ public class NpcBehaviorPerformanceTests
         var relevanceService = new ContentRelevanceService();
         var contentGenerator = new ContentGeneratorService();
         var socialGraph = new SocialGraphService(context);
-        var behaviorService = new NpcBehaviorService(context, relevanceService, contentGenerator, socialGraph);
+        var npcSocialGraph = new NpcSocialGraphService(context, relevanceService);
+        var behaviorService = new NpcBehaviorService(context, relevanceService, contentGenerator, socialGraph, npcSocialGraph);
 
         // Create NPC and lots of content
         var npc = await CreateSingleNpcAsync(context);

@@ -100,17 +100,38 @@ public class NpcSimulationService : INpcSimulationService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<int> ProcessTickAsync(int maxBatchSize = 100)
+    public async Task<SimulationTickResult> ProcessTickAsync(int maxBatchSize = 100)
     {
         var dueNpcs = await GetDueNpcsAsync(maxBatchSize);
         var npcList = dueNpcs.ToList();
         
+        int followsCreated = 0;
+        int unfollowsCreated = 0;
+        
         foreach (var npc in npcList)
         {
+            // Track follow/unfollow actions before processing
+            var existingFollowCount = await _context.Follows
+                .CountAsync(f => f.FollowerAccountId == npc.AccountId);
+            
             await ProcessNpcAsync(npc.NpcId);
+            
+            // Track follow/unfollow changes after processing
+            var newFollowCount = await _context.Follows
+                .CountAsync(f => f.FollowerAccountId == npc.AccountId);
+            
+            if (newFollowCount > existingFollowCount)
+                followsCreated += (newFollowCount - existingFollowCount);
+            else if (newFollowCount < existingFollowCount)
+                unfollowsCreated += (existingFollowCount - newFollowCount);
         }
         
-        return npcList.Count;
+        return new SimulationTickResult(
+            npcList.Count,
+            0,
+            followsCreated,
+            unfollowsCreated,
+            DateTime.UtcNow);
     }
 
     public async Task UpdateNpcAfterSimulationAsync(int npcProfileId, NpcActivityState newState)
