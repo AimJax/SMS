@@ -19,6 +19,9 @@ public static class ServiceCollectionExtensions
         
         // Register social graph service
         services.AddScoped<ISocialGraphService, SocialGraphService>();
+        
+        // Register post service
+        services.AddScoped<IPostService, PostService>();
 
         return services;
     }

@@ -17,6 +17,9 @@ public class AppDbContext : DbContext
     public DbSet<Follow> Follows => Set<Follow>();
     public DbSet<Block> Blocks => Set<Block>();
     public DbSet<Mute> Mutes => Set<Mute>();
+    public DbSet<Post> Posts => Set<Post>();
+    public DbSet<PostLike> PostLikes => Set<PostLike>();
+    public DbSet<Comment> Comments => Set<Comment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,5 +31,8 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new FollowConfiguration());
         modelBuilder.ApplyConfiguration(new BlockConfiguration());
         modelBuilder.ApplyConfiguration(new MuteConfiguration());
+        modelBuilder.ApplyConfiguration(new PostConfiguration());
+        modelBuilder.ApplyConfiguration(new PostLikeConfiguration());
+        modelBuilder.ApplyConfiguration(new CommentConfiguration());
     }
 }

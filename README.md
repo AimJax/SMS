@@ -16,8 +16,9 @@
 | 03 | Persistence | COMPLETE |
 | 04 | Accounts & Authentication | COMPLETE |
 | 05 | Social Graph | COMPLETE |
+| 06 | Posts & Engagement | COMPLETE |
 
-**NEXT: PART 06 — POSTS & ENGAGEMENT**
+**NEXT: PART 07 — FEED & TIMELINE**
 
 ## Architecture
 
@@ -40,12 +41,12 @@ Infrastructure (EF Core / SQLite)
 ```
 Server/
 ├── API/
-│   ├── Controllers/       API endpoints (Auth, Account, Graph)
+│   ├── Controllers/       API endpoints (Auth, Account, Graph, Posts)
 │   └── Middleware/       Exception handling
 ├── Application/
-│   └── Services/         Business logic (AccountService, JwtService, SocialGraphService)
+│   └── Services/         Business logic (AccountService, JwtService, SocialGraphService, PostService)
 ├── Domain/
-│   └── Entities/         Account, Profile, Follow, Block, Mute, AccountHistory
+│   └── Entities/         Account, Profile, Follow, Block, Mute, AccountHistory, Post, PostLike, Comment
 ├── Infrastructure/
 │   └── Persistence/      EF Core DbContext, Entity configurations, Migrations
 ├── Contracts/
@@ -107,6 +108,32 @@ When Account A blocks Account B:
 3. B cannot follow A while blocked
 4. B cannot unblock A (only A can)
 
+## Posts & Engagement
+
+### Post Model
+- **PostId** (GUID) — Stable identity, never changes
+- **AuthorAccountId** — FK to Account
+- **Content** — Text content, max 10,000 characters
+- **Status** — Active, Deleted (soft delete)
+- **CreatedAt/UpdatedAt** — Timestamps
+
+### PostLike Model
+- **PostId** — FK to Post
+- **AccountId** — FK to Account
+- **CreatedAt** — When like occurred
+- **UNIQUE** constraint on (PostId, AccountId) prevents duplicate likes
+
+### Comment Model
+- **CommentId** (GUID) — Stable identity
+- **PostId** — FK to Post
+- **AuthorAccountId** — FK to Account
+- **Content** — Text content, max 2,000 characters
+- **Status** — Active, Deleted (soft delete)
+- **CreatedAt/UpdatedAt** — Timestamps
+
+### Soft Delete Behavior
+Posts and comments use soft delete (Status field) to preserve data integrity and history.
+
 ## Authentication
 
 - **JWT Bearer Tokens** — 7-day expiration
@@ -139,6 +166,18 @@ When Account A blocks Account B:
 | `/api/accounts/{id}/mute` | POST | Yes | Mute account |
 | `/api/accounts/{id}/mute` | DELETE | Yes | Unmute account |
 | `/api/accounts/{id}/relationship` | GET | Yes | Get relationship status |
+
+### Posts & Engagement
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/posts` | POST | Yes | Create a new post |
+| `/api/posts/{postId}` | GET | No | Get post by ID |
+| `/api/posts/{postId}` | DELETE | Yes (owner) | Delete post |
+| `/api/posts/{postId}/like` | POST | Yes | Like a post |
+| `/api/posts/{postId}/like` | DELETE | Yes | Unlike a post |
+| `/api/posts/{postId}/comments` | GET | No | Get post comments (paginated) |
+| `/api/posts/{postId}/comments` | POST | Yes | Add comment to post |
+| `/api/comments/{commentId}` | DELETE | Yes (owner) | Delete comment |
 
 ### Persistence Test
 | Endpoint | Method | Auth | Description |
@@ -249,6 +288,38 @@ Response includes:
 | Value | TEXT | max 500 |
 | CreatedAt | TEXT | datetime |
 
+### Posts
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| PostId | TEXT | UNIQUE (GUID) |
+| AuthorAccountId | INTEGER | FK → Accounts |
+| Content | TEXT | max 10000 |
+| Status | INTEGER | enum |
+| CreatedAt | TEXT | datetime |
+| UpdatedAt | TEXT | datetime |
+
+### PostLikes
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| PostId | INTEGER | FK → Posts |
+| AccountId | INTEGER | FK → Accounts |
+| CreatedAt | TEXT | datetime |
+| **UNIQUE** | | (PostId, AccountId) |
+
+### Comments
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| CommentId | TEXT | UNIQUE (GUID) |
+| PostId | INTEGER | FK → Posts |
+| AuthorAccountId | INTEGER | FK → Accounts |
+| Content | TEXT | max 2000 |
+| Status | INTEGER | enum |
+| CreatedAt | TEXT | datetime |
+| UpdatedAt | TEXT | datetime |
+
 ## Configuration
 
 **Server URL (Android Emulator):** `http://10.0.2.2:5225`
@@ -302,6 +373,29 @@ $targetId = "target-account-guid"
 Invoke-RestMethod "http://localhost:5225/api/accounts/$targetId/follow" -Method POST -Headers @{"Authorization"="Bearer $token"}
 ```
 
+### Test Create Post
+
+```powershell
+$token = "your-jwt-token"
+Invoke-RestMethod http://localhost:5225/api/posts -Method POST -Body (@{content="Hello world!"} | ConvertTo-Json) -ContentType "application/json" -Headers @{"Authorization"="Bearer $token"}
+```
+
+### Test Like Post
+
+```powershell
+$token = "your-jwt-token"
+$postId = "post-guid"
+Invoke-RestMethod "http://localhost:5225/api/posts/$postId/like" -Method POST -Headers @{"Authorization"="Bearer $token"}
+```
+
+### Test Add Comment
+
+```powershell
+$token = "your-jwt-token"
+$postId = "post-guid"
+Invoke-RestMethod "http://localhost:5225/api/posts/$postId/comments" -Method POST -Body (@{content="Great post!"} | ConvertTo-Json) -ContentType "application/json" -Headers @{"Authorization"="Bearer $token"}
+```
+
 ## Verification Results
 
 | Test | Result |
@@ -329,6 +423,23 @@ Invoke-RestMethod "http://localhost:5225/api/accounts/$targetId/follow" -Method 
 | Relationship query | PASS |
 | Graph persistence (restart) | PASS |
 | Database schema | PASS |
+| Create post (authenticated) | PASS |
+| Create post (unauthenticated rejection) | PASS |
+| Get post by ID | PASS |
+| Delete post (owner only) | PASS |
+| Delete post (not owner rejection) | PASS |
+| Like post | PASS |
+| Like post (duplicate rejection) | PASS |
+| Unlike post | PASS |
+| Unlike post (idempotent) | PASS |
+| Get comments (public) | PASS |
+| Create comment | PASS |
+| Delete comment (owner only) | PASS |
+| Delete comment (not owner rejection) | PASS |
+| Post validation (empty content) | PASS |
+| Pagination in comments | PASS |
+| Post persistence (restart) | PASS |
+| Database schema (Posts/Comments) | PASS |
 
 ## License
 

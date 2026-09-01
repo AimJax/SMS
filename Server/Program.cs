@@ -79,5 +79,6 @@ app.MapPersistenceTestEndpoints();
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
 app.MapGraphEndpoints();
+app.MapPostEndpoints();
 
 app.Run();
