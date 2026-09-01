@@ -14,8 +14,9 @@
 | 01F | Foundation Checkpoint | COMPLETE |
 | 02 | Backend Architecture | COMPLETE |
 | 03 | Persistence | COMPLETE |
+| 04 | Accounts & Authentication | COMPLETE |
 
-**NEXT: PART 04 — ACCOUNTS & AUTHENTICATION**
+**NEXT: PART 05 — SOCIAL GRAPH**
 
 ## Architecture
 
@@ -38,114 +39,128 @@ Infrastructure (EF Core / SQLite)
 ```
 Server/
 ├── API/
-│   ├── Controllers/       API endpoints
+│   ├── Controllers/       API endpoints (Auth, Account, PersistenceTest)
 │   └── Middleware/       Exception handling
 ├── Application/
-│   └── Services/         Business logic interfaces & implementations
+│   └── Services/         Business logic (AccountService, JwtService, etc.)
 ├── Domain/
-│   └── Entities/         Domain models
+│   └── Entities/         Account, Profile, AccountHistory, PersistenceTest
 ├── Infrastructure/
-│   └── Persistence/     EF Core DbContext, Entity configurations
+│   └── Persistence/      EF Core DbContext, Entity configurations, Migrations
 ├── Contracts/
 │   ├── Requests/        API request DTOs
 │   └── Responses/       API response DTOs
-├── Extensions/           DI registration extensions
+├── Extensions/           DI registration
 └── Program.cs
 ```
 
-### Layer Responsibilities
+## Account Architecture
 
-| Layer | Responsibility |
-|-------|---------------|
-| **API** | HTTP routing, request handling, error responses |
-| **Application** | Business logic orchestration, service interfaces |
-| **Domain** | Entity definitions, domain rules |
-| **Infrastructure** | Database access, EF Core configurations |
-| **Contracts** | API request/response DTOs |
+### Account Model
+- **AccountId** (GUID) — Stable identity, never changes
+- **Username** — Unique, case-insensitive
+- **PasswordHash** — PBKDF2 with SHA256
+- **Email** — Optional
+- **AccountType** — OrdinaryUser, Creator, Influencer, Celebrity, Official, News
+- **Status** — Active, Disabled, Suspended, Banned
+- **CreatedAt/UpdatedAt** — Timestamps
+
+### Profile Model
+- **AccountId** (FK) — Links to Account
+- **DisplayName** — Public display name
+- **Bio** — Optional biography
+- **AvatarUrl** — Optional avatar
+
+### Account History
+- Permanent record of account events
+- Event types: Created, UsernameChanged, DisplayNameChanged, etc.
+- Never deleted
+
+## Authentication
+
+- **JWT Bearer Tokens** — 7-day expiration
+- **PBKDF2 Password Hashing** — 100,000 iterations
+- **Claims-based Authorization** — NameIdentifier maps to Account.Id
+
+## API Endpoints
+
+### Authentication
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/auth/register` | POST | No | Register new account |
+| `/api/auth/login` | POST | No | Login and receive JWT |
+
+### Account
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/account/me` | GET | Yes | Get authenticated account |
+| `/api/account/{accountId}` | GET | Yes | Get public profile |
+
+### Persistence Test
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/health` | GET | No | Health check |
+| `/api/persistence-test` | POST/GET | No | Persistence test endpoints |
 
 ## Technology Stack
 
 - **Client:** C# / .NET MAUI (Android/iOS/MacCatalyst)
 - **Server:** C# / ASP.NET Core 10.0
 - **Database:** SQLite via Entity Framework Core
+- **Authentication:** JWT Bearer / PBKDF2
 - **Future AI:** Ollama + Qwen
 
-## Repository Structure
+## Database Schema
 
-```
-├── Client/               Android application (.NET MAUI)
-│   ├── Configuration/    App configuration (server URL)
-│   ├── Models/           Data models
-│   └── Services/         API services (ApiService)
-├── Server/               ASP.NET Core backend
-│   ├── API/              Controllers, middleware
-│   ├── Application/       Service interfaces & implementations
-│   ├── Domain/           Entity definitions
-│   ├── Infrastructure/    Persistence (EF Core, Entity configurations)
-│   ├── Contracts/        Request/response DTOs
-│   └── Extensions/        DI registration
-├── Shared/               Shared contracts and models
-├── Database/             Database files (sms.db)
-├── Tests/               Automated tests
-├── Documentation/       Project documentation
-├── .gitignore
-├── README.md
-└── SocialMediaSimulator.slnx
-```
+### Accounts
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| AccountId | TEXT | UNIQUE (GUID) |
+| Username | TEXT | max 50 |
+| UsernameNormalized | TEXT | UNIQUE, max 50 |
+| PasswordHash | TEXT | PBKDF2 |
+| Email | TEXT | max 255, nullable |
+| AccountType | INTEGER | enum |
+| Status | INTEGER | enum |
+| CreatedAt | TEXT | datetime |
+| UpdatedAt | TEXT | datetime |
 
-## Persistence Architecture
+### Profiles
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| AccountId | INTEGER | FK → Accounts, UNIQUE |
+| DisplayName | TEXT | max 100 |
+| Bio | TEXT | max 500, nullable |
+| AvatarUrl | TEXT | max 500, nullable |
 
-### SQLite Configuration
-- **WAL Mode:** Enabled (Write-Ahead Logging for concurrency)
-- **Foreign Keys:** Enabled
-- **Busy Timeout:** 5 seconds
-- **Synchronous:** NORMAL
+### AccountHistory
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| AccountId | INTEGER | FK → Accounts |
+| EventType | INTEGER | enum |
+| Details | TEXT | max 1000, nullable |
+| CreatedAt | TEXT | datetime |
 
-### Entity Framework Core
-- **DbContext:** `AppDbContext`
-- **Connection:** Configured via `appsettings.json`
-- **Entity Configuration:** Separate configuration classes per entity
+### PersistenceTests
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| Value | TEXT | max 500 |
+| CreatedAt | TEXT | datetime |
 
-### Unit of Work
-- **Interface:** `IUnitOfWork`
-- **Implementation:** `UnitOfWork`
-- **Purpose:** Transaction management for multi-entity operations
+## Configuration
 
-### Current Database Schema
-```
-PersistenceTests
-├── Id (INTEGER, PK, AUTOINCREMENT)
-├── Value (TEXT, NOT NULL, max 500)
-└── CreatedAt (TEXT, NOT NULL, indexed)
-```
-
-## Current Implementation
-
-### Server Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Returns `{"status": "ok"}` |
-| `/api/persistence-test` | POST | Create test record |
-| `/api/persistence-test/{id}` | GET | Get test record by ID |
-| `/api/persistence-test` | GET | List all test records |
-
-### Client Features
-
-- Server connectivity check via `/api/health`
-- Visual status indicator (ONLINE/OFFLINE)
-- Error handling with user-friendly messages
-- Loading indicator during requests
-- Manual "Check Server" button
-
-### Configuration
-
-**Server URL (Android Emulator):** `http://10.0.2.2:5225`  
-*(The Android emulator uses 10.0.2.2 to reach the host machine's localhost)*
-
-**Server URL (Physical Device):** Use local network IP address of development machine
+**Server URL (Android Emulator):** `http://10.0.2.2:5225`
 
 **Database Location:** `D:\SMS\Database\sms.db`
+
+**JWT Configuration:**
+- SecretKey in `appsettings.json`
+- 7-day token expiration
+- HMAC SHA256 signing
 
 ## Getting Started
 
@@ -154,7 +169,6 @@ PersistenceTests
 - .NET 10.0 SDK or later
 - Android SDK (API 35+)
 - Java JDK 21+
-- Android emulator or device for testing
 
 ### Build
 
@@ -169,20 +183,16 @@ cd Server
 dotnet run
 ```
 
-Server runs on: `http://localhost:5225`
-
-### Run Client (Android)
-
-```bash
-cd Client
-dotnet build -t:Run -f net10.0-android
-```
-
-### Test Backend
+### Test Registration
 
 ```powershell
-Invoke-RestMethod http://localhost:5225/api/health
-# Returns: @{status=ok}
+Invoke-RestMethod http://localhost:5225/api/auth/register -Method POST -Body (@{username="test";password="Password123!"} | ConvertTo-Json) -ContentType "application/json"
+```
+
+### Test Login
+
+```powershell
+Invoke-RestMethod http://localhost:5225/api/auth/login -Method POST -Body (@{username="test";password="Password123!"} | ConvertTo-Json) -ContentType "application/json"
 ```
 
 ## Verification Results
@@ -190,14 +200,13 @@ Invoke-RestMethod http://localhost:5225/api/health
 | Test | Result |
 |------|--------|
 | Server build | PASS |
-| Server health endpoint | PASS |
-| Persistence endpoint (POST) | PASS |
-| Persistence endpoint (GET) | PASS |
-| Persistence after restart | PASS |
-| WAL mode | PASS |
-| All data preserved | PASS |
-| Exception middleware | PASS |
-| DI service resolution | PASS |
+| Health endpoint | PASS |
+| Account registration | PASS |
+| Account login | PASS |
+| Duplicate username rejection | PASS |
+| Authenticated /me endpoint | PASS |
+| Account persistence (restart) | PASS |
+| Database schema | PASS |
 
 ## License
 

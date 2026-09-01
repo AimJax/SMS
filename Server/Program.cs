@@ -1,3 +1,6 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using SocialMediaSimulator.Server.API.Controllers;
 using SocialMediaSimulator.Server.API.Middleware;
 using SocialMediaSimulator.Server.Extensions;
@@ -18,6 +21,32 @@ builder.Services.AddApplicationServices(builder.Configuration);
 // Add persistence
 builder.Services.AddPersistence(builder.Configuration);
 
+// Configure JWT Authentication
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "SocialMediaSimulator";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "SocialMediaSimulator";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+    };
+});
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Initialize database on startup
@@ -37,10 +66,16 @@ if (app.Environment.IsDevelopment())
 // Add exception handling middleware
 app.UseExceptionHandling();
 
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Health endpoint
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 
 // Map API endpoints
 app.MapPersistenceTestEndpoints();
+app.MapAuthEndpoints();
+app.MapAccountEndpoints();
 
 app.Run();

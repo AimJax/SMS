@@ -10,6 +10,12 @@ public static class ServiceCollectionExtensions
     {
         // Register application services
         services.AddScoped<IPersistenceTestService, PersistenceTestService>();
+        
+        // Register account services
+        services.AddScoped<IAccountService, AccountService>();
+        
+        // Register JWT service
+        services.AddSingleton<IJwtService, JwtService>();
 
         return services;
     }
@@ -23,7 +29,6 @@ public static class ServiceCollectionExtensions
         {
             options.UseSqlite(connectionString, sqliteOptions =>
             {
-                // Enable command timeout for longer operations
                 sqliteOptions.CommandTimeout(30);
             });
         });

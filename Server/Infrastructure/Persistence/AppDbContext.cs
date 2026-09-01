@@ -10,11 +10,17 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<PersistenceTest> PersistenceTests { get; set; } = null!;
+    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Profile> Profiles => Set<Profile>();
+    public DbSet<AccountHistory> AccountHistory => Set<AccountHistory>();
+    public DbSet<PersistenceTest> PersistenceTests => Set<PersistenceTest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Apply entity configurations
+        modelBuilder.ApplyConfiguration(new AccountConfiguration());
+        modelBuilder.ApplyConfiguration(new ProfileConfiguration());
+        modelBuilder.ApplyConfiguration(new AccountHistoryConfiguration());
         modelBuilder.ApplyConfiguration(new PersistenceTestConfiguration());
     }
 }
