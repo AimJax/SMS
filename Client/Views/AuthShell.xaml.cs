@@ -49,11 +49,11 @@ public partial class AuthShell : ContentPage
         };
         var formLayout = new VerticalStackLayout { Spacing = 15 };
 
-        _emailEntry = new Entry { Placeholder = "Email", Keyboard = Keyboard.Email, TextColor = Colors.Black, BackgroundColor = Colors.White };
-        _passwordEntry = new Entry { Placeholder = "Password", IsPassword = true, TextColor = Colors.Black, BackgroundColor = Colors.White };
-        _usernameEntry = new Entry { Placeholder = "Username", TextColor = Colors.Black, BackgroundColor = Colors.White };
+        _emailEntry = new Entry { Placeholder = "Email", Keyboard = Keyboard.Email, TextColor = Colors.Black, PlaceholderColor = Colors.DarkGray, BackgroundColor = Colors.White };
+        _passwordEntry = new Entry { Placeholder = "Password", IsPassword = true, TextColor = Colors.Black, PlaceholderColor = Colors.DarkGray, BackgroundColor = Colors.White };
+        _usernameEntry = new Entry { Placeholder = "Username", TextColor = Colors.Black, PlaceholderColor = Colors.DarkGray, BackgroundColor = Colors.White };
         _usernameEntry.IsVisible = false;
-        _displayNameEntry = new Entry { Placeholder = "Display Name", TextColor = Colors.Black, BackgroundColor = Colors.White };
+        _displayNameEntry = new Entry { Placeholder = "Display Name", TextColor = Colors.Black, PlaceholderColor = Colors.DarkGray, BackgroundColor = Colors.White };
         _displayNameEntry.IsVisible = false;
         _errorLabel = new Label { TextColor = Colors.Red, FontSize = 12, IsVisible = false };
         _loadingIndicator = new ActivityIndicator { IsRunning = false, HorizontalOptions = LayoutOptions.Center };
