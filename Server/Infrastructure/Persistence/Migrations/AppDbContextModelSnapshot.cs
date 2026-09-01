@@ -907,9 +907,6 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CoveredTopicId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("CoveredTopicId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -966,7 +963,7 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Category");
 
-                    b.HasIndex("CoveredTopicId1");
+                    b.HasIndex("CoveredTopicId");
 
                     b.HasIndex("IsBreakingNews");
 
@@ -2158,7 +2155,9 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SocialMediaSimulator.Server.Domain.Entities.Topic", "CoveredTopic")
                         .WithMany()
-                        .HasForeignKey("CoveredTopicId1");
+                        .HasForeignKey("CoveredTopicId")
+                        .HasPrincipalKey("TopicId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("SocialMediaSimulator.Server.Domain.Entities.NewsAccount", "NewsAccount")
                         .WithMany("Articles")

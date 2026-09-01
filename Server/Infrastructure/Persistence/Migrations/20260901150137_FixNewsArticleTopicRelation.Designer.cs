@@ -11,8 +11,8 @@ using SocialMediaSimulator.Server.Infrastructure.Persistence;
 namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260901145613_AddNewsSystem")]
-    partial class AddNewsSystem
+    [Migration("20260901150137_FixNewsArticleTopicRelation")]
+    partial class FixNewsArticleTopicRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -910,9 +910,6 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CoveredTopicId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("CoveredTopicId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -969,7 +966,7 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Category");
 
-                    b.HasIndex("CoveredTopicId1");
+                    b.HasIndex("CoveredTopicId");
 
                     b.HasIndex("IsBreakingNews");
 
@@ -2161,7 +2158,9 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SocialMediaSimulator.Server.Domain.Entities.Topic", "CoveredTopic")
                         .WithMany()
-                        .HasForeignKey("CoveredTopicId1");
+                        .HasForeignKey("CoveredTopicId")
+                        .HasPrincipalKey("TopicId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("SocialMediaSimulator.Server.Domain.Entities.NewsAccount", "NewsAccount")
                         .WithMany("Articles")

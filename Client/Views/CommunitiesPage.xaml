@@ -4,12 +4,11 @@
              x:Class="SocialMediaSimulator.Client.Views.CommunitiesPage"
              Title="Communities">
     <Grid>
-        <!-- Communities List -->
         <RefreshView IsRefreshing="{Binding IsLoading}" Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Communities}" SelectionMode="Single">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Margin="10,5" Padding="15" BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+                        <Frame Margin="10,5" Padding="15" BackgroundColor="White">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>

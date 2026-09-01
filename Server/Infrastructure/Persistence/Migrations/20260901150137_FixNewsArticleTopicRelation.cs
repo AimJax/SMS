@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNewsSystem : Migration
+    public partial class FixNewsArticleTopicRelation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -426,8 +426,7 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
                     IsVerified = table.Column<bool>(type: "INTEGER", nullable: false),
                     PublishedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CoveredTopicId1 = table.Column<int>(type: "INTEGER", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -440,10 +439,11 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
                         principalColumn: "NewsAccountId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NewsArticles_Topics_CoveredTopicId1",
-                        column: x => x.CoveredTopicId1,
+                        name: "FK_NewsArticles_Topics_CoveredTopicId",
+                        column: x => x.CoveredTopicId,
                         principalTable: "Topics",
-                        principalColumn: "Id");
+                        principalColumn: "TopicId",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -1099,9 +1099,9 @@ namespace SocialMediaSimulator.Server.Infrastructure.Persistence.Migrations
                 column: "Category");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NewsArticles_CoveredTopicId1",
+                name: "IX_NewsArticles_CoveredTopicId",
                 table: "NewsArticles",
-                column: "CoveredTopicId1");
+                column: "CoveredTopicId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_NewsArticles_IsBreakingNews",

@@ -16,7 +16,7 @@
                         IsVisible="{Binding HasSearched, Converter={StaticResource InverseBoolConverter}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="5" Padding="10" BackgroundColor="{StaticResource Primary}" CornerRadius="10">
+                    <Frame Margin="5" Padding="10" BackgroundColor="#007AFF" CornerRadius="10">
                         <VerticalStackLayout>
                             <Label Text="{Binding DisplayName}" FontAttributes="Bold" TextColor="White"/>
                             <Label Text="{Binding PostCount, StringFormat='{}{0} posts'}" FontSize="11" TextColor="#CCFFFFFF"/>
@@ -35,7 +35,7 @@
                 <DataTemplate>
                     <HorizontalStackLayout Margin="0,5">
                         <Frame WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="0">
-                            <BoxView BackgroundColor="{StaticResource Primary}"/>
+                            <BoxView BackgroundColor="#007AFF"/>
                         </Frame>
                         <VerticalStackLayout Margin="10,0">
                             <Label Text="{Binding Profile.DisplayName}" FontAttributes="Bold"/>
@@ -52,7 +52,7 @@
                         IsVisible="{Binding HasSearched}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="0,5" Padding="10" BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+                    <Frame Margin="0,5" Padding="10" BackgroundColor="White">
                         <VerticalStackLayout>
                             <Label Text="{Binding AuthorDisplayName}" FontAttributes="Bold"/>
                             <Label Text="{Binding Content}" MaxLines="2" LineBreakMode="TailTruncation"/>

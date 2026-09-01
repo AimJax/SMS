@@ -4,7 +4,7 @@
              x:Class="SocialMediaSimulator.Client.Views.CreatePostPage"
              Title="New Post">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Post" Clicked="OnPostClicked" IsEnabled="{Binding CanPost}"/>
+        <ToolbarItem Text="Post" Clicked="OnPostClicked"/>
     </ContentPage.ToolbarItems>
 
     <VerticalStackLayout Padding="15" Spacing="15">
@@ -21,9 +21,8 @@
         <Label Text="{Binding CharCount, StringFormat='{0}/280'}" 
                HorizontalOptions="End" FontSize="12" TextColor="Gray"/>
 
-        <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="12"
-               IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"/>
+        <Label x:Name="ErrorLabel" TextColor="Red" FontSize="12"/>
 
-        <ActivityIndicator IsRunning="{Binding IsPosting}" HorizontalOptions="Center"/>
+        <ActivityIndicator x:Name="PostingIndicator" IsRunning="False" HorizontalOptions="Center"/>
     </VerticalStackLayout>
 </ContentPage>

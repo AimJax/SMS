@@ -3,9 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SocialMediaSimulator.Client.Views.FeedPage"
              Title="Home">
-    <ContentPage.ToolbarItems>
-        <ToolbarItem IconImageSource="search" Command="{Binding NavigateToSearchCommand}"/>
-    </ContentPage.ToolbarItems>
 
     <Grid>
         <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
@@ -14,12 +11,12 @@
                             ItemSizingStrategy="MeasureFirstItem">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Margin="10,5" Padding="15" BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+                        <Frame Margin="10,5" Padding="15" BackgroundColor="White">
                             <VerticalStackLayout Spacing="10">
                                 <!-- Author Header -->
                                 <HorizontalStackLayout Spacing="10">
                                     <Frame WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="0">
-                                        <BoxView BackgroundColor="{StaticResource Primary}"/>
+                                        <BoxView BackgroundColor="#007AFF"/>
                                     </Frame>
                                     <VerticalStackLayout>
                                         <Label Text="{Binding AuthorDisplayName}" FontAttributes="Bold" FontSize="14"/>
@@ -33,19 +30,20 @@
                                 <Label Text="{Binding Content}" FontSize="15" LineBreakMode="WordWrap"/>
 
                                 <!-- Topic -->
-                                <Label Text="{Binding Topic}" FontSize="12" TextColor="{StaticResource Primary}"
-                                       IsVisible="{Binding Topic, Converter={StaticResource StringToBoolConverter}}"/>
+                                <Label Text="{Binding Topic}" FontSize="12" TextColor="#007AFF"/>
 
                                 <!-- Actions -->
                                 <HorizontalStackLayout Spacing="20">
                                     <Button Text="{Binding LikeCount, StringFormat='♥ {0}'}" 
                                             Command="{Binding Source={RelativeSource AncestorType=CollectionView}, Path=BindingContext.LikePostCommand}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource ActionButtonStyle}"/>
+                                            BackgroundColor="Transparent"
+                                            TextColor="Gray"/>
                                     <Button Text="{Binding CommentCount, StringFormat='💬 {0}'}"
                                             Command="{Binding Source={RelativeSource AncestorType=CollectionView}, Path=BindingContext.CommentPostCommand}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource ActionButtonStyle}"/>
+                                            BackgroundColor="Transparent"
+                                            TextColor="Gray"/>
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </Frame>
@@ -55,7 +53,12 @@
         </RefreshView>
 
         <Button Text="+" Command="{Binding CreatePostCommand}" 
-                Style="{StaticResource FabStyle}"
+                BackgroundColor="#007AFF"
+                TextColor="White"
+                FontSize="24"
+                WidthRequest="56"
+                HeightRequest="56"
+                CornerRadius="28"
                 HorizontalOptions="End" VerticalOptions="End"
                 Margin="20"/>
 

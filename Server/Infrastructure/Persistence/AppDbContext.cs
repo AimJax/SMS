@@ -691,6 +691,13 @@ public class AppDbContext : DbContext
                 .HasForeignKey(e => e.NewsAccountId)
                 .HasPrincipalKey(n => n.NewsAccountId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            // Use Guid CoveredTopicId to reference Topic.TopicId
+            entity.HasOne(e => e.CoveredTopic)
+                .WithMany()
+                .HasForeignKey(e => e.CoveredTopicId)
+                .HasPrincipalKey(t => t.TopicId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
         
         // NewsExposure entity configuration

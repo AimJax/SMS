@@ -10,10 +10,10 @@
     <ScrollView>
         <VerticalStackLayout Spacing="15" Padding="15">
             <!-- Profile Header -->
-            <Frame Padding="20" BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+            <Frame Padding="20" BackgroundColor="White">
                 <VerticalStackLayout HorizontalOptions="Center">
                     <Frame WidthRequest="100" HeightRequest="100" CornerRadius="50" Padding="0">
-                        <BoxView BackgroundColor="{StaticResource Primary}"/>
+                        <BoxView BackgroundColor="#007AFF"/>
                     </Frame>
                     <Label Text="{Binding Account.Profile.DisplayName}" FontSize="22" FontAttributes="Bold" 
                            HorizontalOptions="Center" Margin="0,10,0,0"/>
@@ -33,6 +33,12 @@
                             <Label Text="Following" FontSize="12" TextColor="Gray" HorizontalOptions="Center"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
+
+                    <Button Text="{Binding IsFollowing, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Following|Follow'}"
+                            Command="{Binding FollowCommand}"
+                            IsVisible="{Binding IsOwnProfile, Converter={StaticResource InverseBoolConverter}}"
+                            Margin="0,15,0,0"
+                            WidthRequest="120"/>
                 </VerticalStackLayout>
             </Frame>
 

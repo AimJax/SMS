@@ -6,11 +6,6 @@
              x:Class="SocialMediaSimulator.Client.App">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-            
             <!-- Converters -->
             <converters:BoolToTextConverter x:Key="BoolToTextConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
@@ -35,12 +30,12 @@
             
             <Style x:Key="SecondaryButtonStyle" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="Transparent"/>
-                <Setter Property="TextColor" Value="{StaticResource Primary}"/>
+                <Setter Property="TextColor" Value="{DynamicResource Primary}"/>
                 <Setter Property="FontSize" Value="14"/>
             </Style>
             
             <Style x:Key="FabStyle" TargetType="Button">
-                <Setter Property="BackgroundColor" Value="{StaticResource Primary}"/>
+                <Setter Property="BackgroundColor" Value="{DynamicResource Primary}"/>
                 <Setter Property="TextColor" Value="White"/>
                 <Setter Property="FontSize" Value="24"/>
                 <Setter Property="WidthRequest" Value="56"/>
