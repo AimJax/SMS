@@ -12,44 +12,43 @@
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
             <converters:ZeroToBoolConverter x:Key="ZeroToBoolConverter"/>
             
-            <!-- Colors -->
-            <Color x:Key="Primary">#007AFF</Color>
-            <Color x:Key="PrimaryDark">#0056B3</Color>
-            <Color x:Key="Surface">White</Color>
-            <Color x:Key="SurfaceDark">#1C1C1E</Color>
-            <Color x:Key="Background">#F2F2F7</Color>
-            <Color x:Key="BackgroundDark">#000000</Color>
-            <Color x:Key="InputText">Black</Color>
+            <!-- Base / Surface Colors - Night Terminal -->
+            <Color x:Key="Background">#1A1A24</Color>
+            <Color x:Key="Foreground">#F5F5F7</Color>
+            <Color x:Key="Surface">#242430</Color>
+            <Color x:Key="SurfaceRaised">#2C2C38</Color>
+            <Color x:Key="Card">#242430</Color>
+            <Color x:Key="CardForeground">#F5F5F7</Color>
+            <Color x:Key="Popover">#282834</Color>
+            <Color x:Key="PopoverForeground">#F5F5F7</Color>
+            <Color x:Key="Border">#404050</Color>
+            <Color x:Key="InputBorder">#404050</Color>
             
-            <!-- Styles -->
-            <Style x:Key="ActionButtonStyle" TargetType="Button">
-                <Setter Property="BackgroundColor" Value="Transparent"/>
-                <Setter Property="TextColor" Value="Gray"/>
-                <Setter Property="FontSize" Value="14"/>
-                <Setter Property="Padding" Value="0"/>
-            </Style>
+            <!-- Primary / Secondary Accents - Signal Amber -->
+            <Color x:Key="Primary">#F5A623</Color>
+            <Color x:Key="PrimaryForeground">#1A1A10</Color>
+            <Color x:Key="PrimaryGlow">#FFD54F</Color>
+            <Color x:Key="Secondary">#333344</Color>
+            <Color x:Key="SecondaryForeground">#EDEDEF</Color>
+            <Color x:Key="Muted">#2E2E3C</Color>
+            <Color x:Key="MutedForeground">#9E9EA8</Color>
+            <Color x:Key="Accent">#26C6DA</Color>
+            <Color x:Key="AccentForeground">#0A1A1C</Color>
+            <Color x:Key="Destructive">#E53935</Color>
+            <Color x:Key="DestructiveForeground">#FFF5F5</Color>
             
-            <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-                <Setter Property="BackgroundColor" Value="Transparent"/>
-                <Setter Property="TextColor" Value="{StaticResource Primary}"/>
-                <Setter Property="FontSize" Value="14"/>
-            </Style>
+            <!-- Simulator-Specific -->
+            <Color x:Key="Verified">#26C6DA</Color>
+            <Color x:Key="Like">#CF4A30</Color>
+            <Color x:Key="Repost">#4CAF50</Color>
+            <Color x:Key="Trend">#F5A623</Color>
+            <Color x:Key="Warning">#FFC107</Color>
+            <Color x:Key="Online">#4CAF50</Color>
             
-            <Style x:Key="FabStyle" TargetType="Button">
-                <Setter Property="BackgroundColor" Value="{StaticResource Primary}"/>
-                <Setter Property="TextColor" Value="White"/>
-                <Setter Property="FontSize" Value="24"/>
-                <Setter Property="WidthRequest" Value="56"/>
-                <Setter Property="HeightRequest" Value="56"/>
-                <Setter Property="CornerRadius" Value="28"/>
-            </Style>
-            
-            <!-- Input Entry Style - dark text on light background -->
-            <Style x:Key="InputEntryStyle" TargetType="Entry">
-                <Setter Property="TextColor" Value="Black"/>
-                <Setter Property="PlaceholderColor" Value="Gray"/>
-                <Setter Property="BackgroundColor" Value="White"/>
-            </Style>
+            <!-- Shell/Tab Bar -->
+            <Color x:Key="ShellBackground">#1A1A24</Color>
+            <Color x:Key="TabBarBackground">#242430</Color>
+            <Color x:Key="TabBarUnselected">#606070</Color>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

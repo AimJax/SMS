@@ -13,6 +13,11 @@ public partial class MainShell : Shell
     public MainShell()
     {
         InitializeComponent();
+        
+        // Set shell colors for night terminal theme
+        this.BackgroundColor = Color.FromArgb("#1A1A24");
+        this.FlyoutBackgroundColor = Color.FromArgb("#1A1A24");
+        
         Routing.RegisterRoute(nameof(CreatePostPage), typeof(CreatePostPage));
         
         // Wire up navigation events

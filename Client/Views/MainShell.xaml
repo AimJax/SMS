@@ -2,7 +2,8 @@
 <Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        x:Class="SocialMediaSimulator.Client.Views.MainShell"
-       xmlns:views="clr-namespace:SocialMediaSimulator.Client.Views">
+       xmlns:views="clr-namespace:SocialMediaSimulator.Client.Views"
+       Shell.BackgroundColor="#1A1A24">
     
     <TabBar>
         <Tab Title="Home" Icon="home">

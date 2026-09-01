@@ -15,6 +15,7 @@ public partial class AuthShell : ContentPage
     public AuthShell()
     {
         Title = "Create Account";
+        BackgroundColor = Color.FromArgb("#1A1A24");
         
         var mainLayout = new VerticalStackLayout { Padding = 20, Spacing = 15 };
 
@@ -24,6 +25,7 @@ public partial class AuthShell : ContentPage
             Text = "Create Your Account", 
             FontSize = 28, 
             FontAttributes = FontAttributes.Bold,
+            TextColor = Color.FromArgb("#F5F5F7"),
             HorizontalOptions = LayoutOptions.Center,
             Margin = new Thickness(0, 50, 0, 10)
         });
@@ -31,7 +33,7 @@ public partial class AuthShell : ContentPage
         { 
             Text = "Set up your social media profile", 
             FontSize = 14,
-            TextColor = Colors.Gray,
+            TextColor = Color.FromArgb("#9E9EA8"),
             HorizontalOptions = LayoutOptions.Center
         });
 
@@ -41,35 +43,39 @@ public partial class AuthShell : ContentPage
         _usernameEntry = new Entry 
         { 
             Placeholder = "Username", 
-            TextColor = Colors.Black, 
-            PlaceholderColor = Colors.DarkGray, 
-            BackgroundColor = Colors.White 
+            TextColor = Color.FromArgb("#F5F5F7"), 
+            PlaceholderColor = Color.FromArgb("#606070"), 
+            BackgroundColor = Color.FromArgb("#242430"),
+            HeightRequest = 50
         };
         
         _displayNameEntry = new Entry 
         { 
             Placeholder = "Display Name", 
-            TextColor = Colors.Black, 
-            PlaceholderColor = Colors.DarkGray, 
-            BackgroundColor = Colors.White 
+            TextColor = Color.FromArgb("#F5F5F7"), 
+            PlaceholderColor = Color.FromArgb("#606070"), 
+            BackgroundColor = Color.FromArgb("#242430"),
+            HeightRequest = 50
         };
         
         _bioEntry = new Entry 
         { 
             Placeholder = "Bio (optional)", 
-            TextColor = Colors.Black, 
-            PlaceholderColor = Colors.DarkGray, 
-            BackgroundColor = Colors.White 
+            TextColor = Color.FromArgb("#F5F5F7"), 
+            PlaceholderColor = Color.FromArgb("#606070"), 
+            BackgroundColor = Color.FromArgb("#242430"),
+            HeightRequest = 50
         };
 
-        _errorLabel = new Label { TextColor = Colors.Red, FontSize = 12, IsVisible = false };
+        _errorLabel = new Label { TextColor = Color.FromArgb("#E53935"), FontSize = 12, IsVisible = false };
         _loadingIndicator = new ActivityIndicator { IsRunning = false, HorizontalOptions = LayoutOptions.Center };
 
         _submitButton = new Button 
         { 
             Text = "Enter Game",
-            BackgroundColor = Color.FromArgb("#007AFF"),
-            TextColor = Colors.White
+            BackgroundColor = Color.FromArgb("#F5A623"),
+            TextColor = Color.FromArgb("#1A1A10"),
+            HeightRequest = 50
         };
         _submitButton.Clicked += (_, _) => CreateAccountAndEnterAsync();
 

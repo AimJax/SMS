@@ -2,27 +2,32 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SocialMediaSimulator.Client.Views.CreatePostPage"
-             Title="New Post">
+             Title="New Post"
+             BackgroundColor="#1A1A24">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Post" Clicked="OnPostClicked"/>
     </ContentPage.ToolbarItems>
 
-    <VerticalStackLayout Padding="15" Spacing="15">
+    <VerticalStackLayout Padding="15" Spacing="15" BackgroundColor="#1A1A24">
         <Editor x:Name="ContentEditor" 
                 Placeholder="What's happening?" 
                 HeightRequest="150"
+                TextColor="#F5F5F7"
+                BackgroundColor="#242430"
+                PlaceholderColor="#606070"
                 TextChanged="OnContentChanged"/>
 
         <HorizontalStackLayout Spacing="10">
-            <Label Text="Topic (optional):" VerticalOptions="Center"/>
-            <Entry Placeholder="e.g. #gaming" Text="{Binding Topic}" WidthRequest="200"/>
+            <Label Text="Topic (optional):" VerticalOptions="Center" TextColor="#F5F5F7"/>
+            <Entry Placeholder="e.g. #gaming" Text="{Binding Topic}" WidthRequest="200"
+                   TextColor="#F5F5F7" BackgroundColor="#242430" PlaceholderColor="#606070"/>
         </HorizontalStackLayout>
 
         <Label Text="{Binding CharCount, StringFormat='{0}/280'}" 
-               HorizontalOptions="End" FontSize="12" TextColor="Gray"/>
+               HorizontalOptions="End" FontSize="12" TextColor="#606070"/>
 
-        <Label x:Name="ErrorLabel" TextColor="Red" FontSize="12"/>
+        <Label x:Name="ErrorLabel" TextColor="#E53935" FontSize="12"/>
 
-        <ActivityIndicator x:Name="PostingIndicator" IsRunning="False" HorizontalOptions="Center"/>
+        <ActivityIndicator x:Name="PostingIndicator" IsRunning="False" HorizontalOptions="Center" Color="#F5A623"/>
     </VerticalStackLayout>
 </ContentPage>

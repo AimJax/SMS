@@ -2,27 +2,30 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SocialMediaSimulator.Client.Views.CommunitiesPage"
-             Title="Communities">
-    <Grid>
-        <RefreshView IsRefreshing="{Binding IsLoading}" Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding Communities}" SelectionMode="Single">
+             Title="Communities"
+             BackgroundColor="#1A1A24">
+    <Grid BackgroundColor="#1A1A24">
+        <RefreshView IsRefreshing="{Binding IsLoading}" Command="{Binding RefreshCommand}" BackgroundColor="#1A1A24">
+            <CollectionView ItemsSource="{Binding Communities}" SelectionMode="Single" BackgroundColor="#1A1A24">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Margin="10,5" Padding="15" BackgroundColor="White">
+                        <Frame Margin="10,5" Padding="15" BackgroundColor="#242430" CornerRadius="12">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <VerticalStackLayout>
-                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="16"/>
-                                    <Label Text="{Binding Description}" MaxLines="2" LineBreakMode="TailTruncation" FontSize="12"/>
-                                    <Label Text="{Binding MemberCount, StringFormat='{0} members'}" FontSize="11" TextColor="Gray"/>
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="16" TextColor="#F5F5F7"/>
+                                    <Label Text="{Binding Description}" MaxLines="2" LineBreakMode="TailTruncation" FontSize="12" TextColor="#9E9EA8"/>
+                                    <Label Text="{Binding MemberCount, StringFormat='{0} members'}" FontSize="11" TextColor="#606070"/>
                                 </VerticalStackLayout>
                                 <Button Grid.Column="1" Text="{Binding IsJoined, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Joined|Join'}"
                                         Command="{Binding Source={RelativeSource AncestorType=CollectionView}, Path=BindingContext.JoinLeaveCommand}"
                                         CommandParameter="{Binding}"
-                                        VerticalOptions="Center"/>
+                                        VerticalOptions="Center"
+                                        BackgroundColor="#333344"
+                                        TextColor="#F5A623"/>
                             </Grid>
                         </Frame>
                     </DataTemplate>
@@ -30,6 +33,6 @@
             </CollectionView>
         </RefreshView>
 
-        <ActivityIndicator IsRunning="{Binding IsLoading}" HorizontalOptions="Center" VerticalOptions="Center"/>
+        <ActivityIndicator IsRunning="{Binding IsLoading}" HorizontalOptions="Center" VerticalOptions="Center" Color="#F5A623"/>
     </Grid>
 </ContentPage>
