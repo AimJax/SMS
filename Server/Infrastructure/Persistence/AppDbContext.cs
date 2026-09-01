@@ -24,6 +24,7 @@ public class AppDbContext : DbContext
     public DbSet<NpcPersonality> NpcPersonalities => Set<NpcPersonality>();
     public DbSet<NpcInterest> NpcInterests => Set<NpcInterest>();
     public DbSet<NpcAction> NpcActions => Set<NpcAction>();
+    public DbSet<AiProviderConfig> AiProviderConfigs => Set<AiProviderConfig>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,5 +43,17 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new NpcPersonalityConfiguration());
         modelBuilder.ApplyConfiguration(new NpcInterestConfiguration());
         modelBuilder.ApplyConfiguration(new NpcActionConfiguration());
+        
+        // Apply AI provider configuration
+        modelBuilder.Entity<AiProviderConfig>(entity =>
+        {
+            entity.ToTable("AiProviderConfigs");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Provider).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Model).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.ApiKey).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.BaseUrl).HasMaxLength(500);
+            entity.HasIndex(e => e.Provider).IsUnique();
+        });
     }
 }

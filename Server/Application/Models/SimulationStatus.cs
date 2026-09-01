@@ -99,4 +99,39 @@ public class SimulationStatus
     /// Number of unfollows in the last tick
     /// </summary>
     public int LastTickUnfollows { get; set; }
+    
+    /// <summary>
+    /// Total AI generation attempts since service start
+    /// </summary>
+    public long TotalAiAttempts { get; set; }
+    
+    /// <summary>
+    /// Total successful AI generations since service start
+    /// </summary>
+    public long TotalAiSuccesses { get; set; }
+    
+    /// <summary>
+    /// Total AI generation fallbacks to template since service start
+    /// </summary>
+    public long TotalAiFallbacks { get; set; }
+    
+    /// <summary>
+    /// Last AI generation error message (if any), without sensitive data
+    /// </summary>
+    public string? LastAiError { get; set; }
+    
+    /// <summary>
+    /// Currently configured AI provider name (or null if not configured)
+    /// </summary>
+    public string? AiProvider { get; set; }
+    
+    /// <summary>
+    /// Currently configured AI model (or null if not configured)
+    /// </summary>
+    public string? AiModel { get; set; }
+    
+    /// <summary>
+    /// Whether AI generation is currently enabled
+    /// </summary>
+    public bool IsAiEnabled { get; set; }
 }

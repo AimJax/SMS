@@ -23,8 +23,9 @@
 | 10 | NPC Behavior Simulation | COMPLETE |
 | 11 | NPC Background Simulation | COMPLETE |
 | 12 | NPC Social Graph | COMPLETE |
+| 13 | AI Content Generation | COMPLETE |
 
-**NEXT: PART 13 — LLM Content Generation**
+**NEXT: PART 14 — [To be determined]**
 
 ## Architecture
 
@@ -630,11 +631,148 @@ All NPC actions are recorded in `NpcAction`:
 - Candidate generation performance
 - Content relevance calculation performance
 
-### Intentionally Not Implemented
+## AI Content Generation
 
-- **LLM Integration** — Ollama/Qwen NPC content generation (future part)
-- **NPC-Specific API** — Full admin NPC management CRUD endpoints (future part)
-- **Android Simulation UI** — Client-side simulation control
+### Overview
+NPC-generated posts and comments can be powered by AI text generation instead of the template-based system from Part 10. The system is **provider-agnostic** — any OpenAI-compatible API can be used. Configuration is stored in the database for **runtime reconfiguration without server restart**.
+
+### Architecture Change
+
+```
+NpcBehaviorService
+      ↓
+IContentGeneratorService (interface)
+      ↓
+AiContentGeneratorService (Part 13)
+      ├── AI enabled → IAiTextGenerationService → Provider (OpenAI/Anthropic/Generic)
+      └── AI disabled/error → ContentGeneratorService (Part 10 templates)
+```
+
+### Provider-Agnostic Design
+```
+Application Layer
+      └── IAiTextGenerationService (abstraction)
+              ↓
+Infrastructure Layer
+      ├── OpenAiProvider (OpenAI API)
+      ├── AnthropicProvider (Anthropic API)
+      └── GenericHttpProvider (OpenAI-compatible: DeepSeek, Ollama, etc.)
+```
+
+### Supported Providers
+
+| Provider | Auth Header | Notes |
+|----------|-------------|-------|
+| OpenAI | `Authorization: Bearer <key>` | Default endpoint: `api.openai.com/v1` |
+| Anthropic | `x-api-key: <key>` | Default endpoint: `api.anthropic.com/v1` |
+| Generic | `Authorization: Bearer <key>` | Requires `BaseUrl` for custom endpoints |
+
+### Configuration at Runtime
+Configuration is stored in SQLite (`AiProviderConfigs` table), allowing changes without server restart:
+
+| Field | Description |
+|-------|-------------|
+| Provider | "OpenAI", "Anthropic", or "Generic" |
+| Model | Model identifier (e.g., "gpt-4o", "claude-3-5-sonnet-20241022") |
+| ApiKey | API key (stored plaintext — see Security) |
+| BaseUrl | Required for Generic provider (e.g., `https://api.deepseek.com`) |
+| IsEnabled | Toggle AI on/off without removing configuration |
+| TimeoutSeconds | API timeout (5-120 seconds, default 30) |
+
+### Admin Endpoints
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/admin/ai/config` | GET | Yes | Get current config (key masked) |
+| `/api/admin/ai/config` | PUT | Yes | Update provider/model/key |
+| `/api/admin/ai/test` | POST | Yes | Test connection with simple prompt |
+
+#### GET /api/admin/ai/config Response
+```json
+{
+  "provider": "OpenAI",
+  "model": "gpt-4o",
+  "hasApiKey": true,
+  "apiKeyMasked": "****2345",
+  "baseUrl": null,
+  "isEnabled": true,
+  "timeoutSeconds": 30,
+  "updatedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+#### PUT /api/admin/ai/config Request
+```json
+{
+  "provider": "OpenAI",
+  "model": "gpt-4o",
+  "apiKey": "sk-your-key-here",
+  "baseUrl": null,
+  "isEnabled": true,
+  "timeoutSeconds": 30
+}
+```
+
+### API Key Security
+
+> **⚠️ Security Note:** The API key is stored **plaintext** in the SQLite database. This is appropriate for local development and self-hosted deployments, but production environments should consider:
+> - Restricting database file access
+> - Implementing encryption at rest
+> - Using a secrets management service
+
+**Never exposed:**
+- API key never appears in GET responses (only masked form)
+- API key never appears in logs
+- Error messages are sanitized to remove key patterns
+
+### Fallback Behavior
+If AI generation fails, the system **automatically falls back** to template-based content:
+
+| Failure Scenario | Behavior |
+|------------------|----------|
+| No provider configured | Use templates |
+| AI disabled via `IsEnabled=false` | Use templates |
+| Provider call times out | Use templates |
+| Provider returns error | Use templates |
+| Network error | Use templates |
+
+The NPC's tick continues normally — no NPC is skipped due to AI failure.
+
+### Prompt Construction
+`AiPromptBuilder` constructs prompts including:
+
+- **Account type system prompt**: Different guidance for OrdinaryUser vs Celebrity vs News vs Creator, etc.
+- **Personality context**: Big Five traits influence tone (e.g., "You are very outgoing", "You are more reserved")
+- **Interest context**: Top 3 interests included
+- **Content constraints**: Length, format, emoji guidance appropriate for social media
+
+### Observability
+Extended simulation status includes AI metrics:
+
+```json
+{
+  "totalAiAttempts": 450,
+  "totalAiSuccesses": 445,
+  "totalAiFallbacks": 5,
+  "lastAiError": "Request timed out",
+  "aiProvider": "OpenAI",
+  "aiModel": "gpt-4o",
+  "isAiEnabled": true
+}
+```
+
+### Performance Considerations
+- AI calls have a 10-second timeout (configurable via provider config)
+- Slow AI calls don't block other NPCs — each NPC's generation runs independently
+- Template fallback ensures tick continues even if AI is slow
+- HTTP client uses named client factory for connection pooling
+
+### Intentionally Not Implemented
+- Image/video generation
+- Embeddings/vector search
+- Full secrets vault or external key management
+- Android UI for AI configuration
+- Streaming responses
 
 ## NPC Social Graph
 
@@ -1180,6 +1318,17 @@ $feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSi
 | NPC social graph - reciprocity score by account type | PASS |
 | Simulation status social graph metrics | PASS |
 | Simulation tick result social graph data | PASS |
+| AI content - disabled uses template | PASS |
+| AI content - enabled uses AI provider | PASS |
+| AI content - fallback on failure | PASS |
+| AI config - empty returns no config | PASS |
+| AI config - valid OpenAI config stored | PASS |
+| AI config - invalid provider rejected | PASS |
+| AI config - Generic requires BaseUrl | PASS |
+| AI config - masked API key in response | PASS |
+| AI providers validation | PASS |
+| AI prompt builder - personality context | PASS |
+| AI prompt builder - comment includes post | PASS |
 
 ## License
 

@@ -35,10 +35,24 @@ public static class ServiceCollectionExtensions
         
         // Register NPC behavior services
         services.AddSingleton<IContentRelevanceService, ContentRelevanceService>();
-        services.AddSingleton<IContentGeneratorService, ContentGeneratorService>();
+        services.AddSingleton<ContentGeneratorService>(); // Template fallback
+        services.AddSingleton<AiPromptBuilder>();
         services.AddSingleton<INpcDecisionService, NpcDecisionService>();
         services.AddScoped<INpcBehaviorService, NpcBehaviorService>();
         services.AddScoped<INpcSocialGraphService, NpcSocialGraphService>();
+        
+        // Register AI services
+        services.AddHttpClient("AIProvider"); // Named HTTP client for AI providers
+        services.AddScoped<IAiProviderService, AiProviderService>();
+        services.AddSingleton<IContentGeneratorService>(sp =>
+        {
+            var aiService = sp.GetRequiredService<IAiProviderService>();
+            var templateGenerator = sp.GetRequiredService<ContentGeneratorService>();
+            var promptBuilder = sp.GetRequiredService<AiPromptBuilder>();
+            var logger = sp.GetRequiredService<ILogger<AiContentGeneratorService>>();
+            var simulationState = sp.GetService<ISimulationStateService>();
+            return new AiContentGeneratorService(aiService, templateGenerator, promptBuilder, logger, simulationState);
+        });
         
         // Register behavior configuration
         services.AddSingleton<NpcBehaviorConfig>(sp => new NpcBehaviorConfig

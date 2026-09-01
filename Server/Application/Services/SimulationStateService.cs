@@ -61,6 +61,16 @@ public interface ISimulationStateService
     /// Record follow/unfollow counts from a tick
     /// </summary>
     void RecordSocialGraphActivity(int follows, int unfollows);
+    
+    /// <summary>
+    /// Record AI generation attempt result
+    /// </summary>
+    void RecordAiGenerationAttempt(bool success, string? errorMessage);
+    
+    /// <summary>
+    /// Update AI configuration info in status
+    /// </summary>
+    void UpdateAiConfig(string? provider, string? model, bool isEnabled);
 }
 
 /// <summary>
@@ -100,7 +110,14 @@ public class SimulationStateService : ISimulationStateService
                 TotalNpcFollows = 0,
                 TotalNpcUnfollows = 0,
                 LastTickFollows = 0,
-                LastTickUnfollows = 0
+                LastTickUnfollows = 0,
+                TotalAiAttempts = 0,
+                TotalAiSuccesses = 0,
+                TotalAiFallbacks = 0,
+                LastAiError = null,
+                AiProvider = null,
+                AiModel = null,
+                IsAiEnabled = false
             };
             _isPaused = false;
             _tickInProgress = false;
@@ -128,7 +145,18 @@ public class SimulationStateService : ISimulationStateService
                 LastTickNpcsProcessed = _status.LastTickNpcsProcessed,
                 ServiceStartedAt = _status.ServiceStartedAt,
                 IsTickInProgress = _tickInProgress,
-                CurrentTickStartedAt = _currentTickStartTime
+                CurrentTickStartedAt = _currentTickStartTime,
+                TotalNpcFollows = _status.TotalNpcFollows,
+                TotalNpcUnfollows = _status.TotalNpcUnfollows,
+                LastTickFollows = _status.LastTickFollows,
+                LastTickUnfollows = _status.LastTickUnfollows,
+                TotalAiAttempts = _status.TotalAiAttempts,
+                TotalAiSuccesses = _status.TotalAiSuccesses,
+                TotalAiFallbacks = _status.TotalAiFallbacks,
+                LastAiError = _status.LastAiError,
+                AiProvider = _status.AiProvider,
+                AiModel = _status.AiModel,
+                IsAiEnabled = _status.IsAiEnabled
             };
         }
     }
@@ -234,5 +262,52 @@ public class SimulationStateService : ISimulationStateService
             _status.LastTickFollows = follows;
             _status.LastTickUnfollows = unfollows;
         }
+    }
+
+    public void RecordAiGenerationAttempt(bool success, string? errorMessage)
+    {
+        lock (_lock)
+        {
+            _status.TotalAiAttempts++;
+            if (success)
+            {
+                _status.TotalAiSuccesses++;
+            }
+            else
+            {
+                _status.TotalAiFallbacks++;
+                // Store error message but ensure no sensitive data
+                _status.LastAiError = SanitizeErrorMessage(errorMessage);
+            }
+        }
+    }
+
+    public void UpdateAiConfig(string? provider, string? model, bool isEnabled)
+    {
+        lock (_lock)
+        {
+            _status.AiProvider = provider;
+            _status.AiModel = model;
+            _status.IsAiEnabled = isEnabled;
+        }
+    }
+
+    private static string? SanitizeErrorMessage(string? errorMessage)
+    {
+        if (string.IsNullOrEmpty(errorMessage))
+            return null;
+
+        // Remove potential API key patterns
+        var sanitized = System.Text.RegularExpressions.Regex.Replace(
+            errorMessage,
+            @"(sk-[a-zA-Z0-9]{20,}|api[_-]?key[""']?\s*[:=]\s*['""]?[a-zA-Z0-9_-]{10,})",
+            "[REDACTED]",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        // Truncate long error messages
+        if (sanitized.Length > 200)
+            sanitized = sanitized[..200] + "...";
+
+        return sanitized;
     }
 }
