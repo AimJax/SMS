@@ -3838,7 +3838,31 @@ The network can report on itself.
 
 ---
 
-# PART 23 — PERMANENT MEMORY
+# PART 23 — ANDROID UI IMPLEMENTATION
+
+*This part was not in the original Master Prompt. Added to make the app usable.*
+
+Implement:
+
+* Authentication screens (login/register)
+* Main navigation (bottom tabs)
+* Feed page with posts
+* Post creation
+* Profile page
+* Notifications view
+* Communities view
+* Search functionality
+* Comments and engagement
+* API service integration
+* Token persistence
+
+### Stop condition:
+
+User can register, login, view feed, create posts, and interact with the simulation.
+
+---
+
+# PART 24 — PERMANENT MEMORY
 
 Implement:
 
@@ -3859,7 +3883,7 @@ NPC memories survive indefinitely.
 
 ---
 
-# PART 24 — MEMORY RETRIEVAL
+# PART 25 — MEMORY RETRIEVAL
 
 Implement:
 
@@ -3877,7 +3901,7 @@ NPC context can be reconstructed efficiently without loading entire history.
 
 ---
 
-# PART 25 — OLLAMA & QWEN3-4B
+# PART 26 — OLLAMA & QWEN3-4B
 
 Implement:
 
@@ -3897,7 +3921,7 @@ Server can successfully send and receive controlled LLM requests.
 
 ---
 
-# PART 26 — LLM LANGUAGE GENERATION
+# PART 27 — LLM LANGUAGE GENERATION
 
 Implement LLM-assisted:
 
@@ -3921,7 +3945,7 @@ NPCs can generate contextually appropriate language.
 
 ---
 
-# PART 27 — SOCIAL DRAMA
+# PART 28 — SOCIAL DRAMA
 
 Combine:
 
@@ -3953,7 +3977,7 @@ Interesting social stories emerge without scripted story missions.
 
 ---
 
-# PART 28 — MESSAGING
+# PART 29 — MESSAGING
 
 Implement:
 
@@ -3970,7 +3994,7 @@ Private social interactions work.
 
 ---
 
-# PART 29 — PLAYER EVENTS & COMMUNITIES
+# PART 30 — PLAYER EVENTS & COMMUNITIES
 
 Implement:
 
@@ -3986,7 +4010,7 @@ Player can meaningfully shape the social network.
 
 ---
 
-# PART 30 — MODERATION
+# PART 31 — MODERATION
 
 Implement:
 
@@ -4007,7 +4031,7 @@ The platform can govern itself.
 
 ---
 
-# PART 31 — VERIFICATION
+# PART 32 — VERIFICATION
 
 Implement:
 
@@ -4024,7 +4048,7 @@ Verification has meaningful social consequences.
 
 ---
 
-# PART 32 — NOTIFICATIONS
+# PART 33 — NOTIFICATIONS
 
 Implement event-driven notifications for:
 
@@ -4046,7 +4070,7 @@ Players receive relevant notifications.
 
 ---
 
-# PART 33 — SYNCHRONIZATION
+# PART 34 — SYNCHRONIZATION
 
 Implement:
 
@@ -4063,7 +4087,7 @@ Clients can efficiently synchronize without downloading the entire world.
 
 ---
 
-# PART 34 — WEBSOCKETS
+# PART 35 — WEBSOCKETS
 
 Use WebSockets where real-time updates provide genuine value.
 
@@ -4083,7 +4107,7 @@ Real-time updates work without compromising reliability.
 
 ---
 
-# PART 35 — ANDROID OPTIMIZATION
+# PART 36 — ANDROID OPTIMIZATION
 
 Implement:
 
@@ -4102,7 +4126,7 @@ Client remains responsive under realistic network conditions.
 
 ---
 
-# PART 36 — SERVER OPTIMIZATION
+# PART 37 — SERVER OPTIMIZATION
 
 Measure and optimize:
 
@@ -4131,7 +4155,7 @@ Do not optimize by deleting history.
 
 ---
 
-# PART 37 — DEBUGGING SYSTEM
+# PART 38 — DEBUGGING SYSTEM
 
 Create developer tools to inspect:
 
@@ -4167,7 +4191,7 @@ Why did this NPC create this post?
 
 ---
 
-# PART 38 — SIMULATION LOGGING
+# PART 39 — SIMULATION LOGGING
 
 Configurable logging for:
 
@@ -4194,7 +4218,7 @@ Avoid excessive production logging.
 
 ---
 
-# PART 39 — HISTORICAL SYSTEMS
+# PART 40 — HISTORICAL SYSTEMS
 
 Implement historical views for:
 
@@ -4211,7 +4235,7 @@ Historical data remains permanent.
 
 ---
 
-# PART 40 — CREATOR ECONOMY
+# PART 41 — CREATOR ECONOMY
 
 Implement later:
 
@@ -4226,7 +4250,7 @@ Keep it subordinate to the social network.
 
 ---
 
-# PART 41 — SECURITY HARDENING
+# PART 42 — SECURITY HARDENING
 
 Audit:
 
@@ -4247,7 +4271,7 @@ The Android client must never receive privileged server credentials.
 
 ---
 
-# PART 42 — PUBLIC SERVER DEPLOYMENT
+# PART 43 — PUBLIC SERVER DEPLOYMENT
 
 Move from development environment to public infrastructure.
 
@@ -4274,7 +4298,7 @@ The client should only need the configured server address.
 
 ---
 
-# PART 43 — BACKUPS
+# PART 44 — BACKUPS
 
 Because history is permanent, backups are critical.
 
@@ -4290,7 +4314,7 @@ Never assume a backup works until restoration has been tested.
 
 ---
 
-# PART 44 — SCALE TESTING
+# PART 45 — SCALE TESTING
 
 Test progressively:
 
@@ -4324,7 +4348,7 @@ Scale based on actual measurements.
 
 ---
 
-# PART 45 — LONG-TERM WORLD TESTING
+# PART 46 — LONG-TERM WORLD TESTING
 
 Run simulations for:
 
@@ -4352,7 +4376,7 @@ Look for simulation collapse, repetitive behavior, runaway populations, excessiv
 
 ---
 
-# PART 46 — EMERGENT STORY TESTING
+# PART 47 — EMERGENT STORY TESTING
 
 Run the world without the player.
 
@@ -4378,7 +4402,7 @@ The objective is:
 
 ---
 
-# PART 47 — FULL INTEGRATION
+# PART 48 — FULL INTEGRATION
 
 Connect:
 
@@ -4422,7 +4446,7 @@ Everything must remain modular.
 
 ---
 
-# PART 48 — FINAL WORLD
+# PART 49 — FINAL WORLD
 
 The final target is:
 
