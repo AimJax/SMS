@@ -19,6 +19,7 @@
             <Color x:Key="SurfaceDark">#1C1C1E</Color>
             <Color x:Key="Background">#F2F2F7</Color>
             <Color x:Key="BackgroundDark">#000000</Color>
+            <Color x:Key="InputText">Black</Color>
             
             <!-- Styles -->
             <Style x:Key="ActionButtonStyle" TargetType="Button">
@@ -30,17 +31,24 @@
             
             <Style x:Key="SecondaryButtonStyle" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="Transparent"/>
-                <Setter Property="TextColor" Value="{DynamicResource Primary}"/>
+                <Setter Property="TextColor" Value="{StaticResource Primary}"/>
                 <Setter Property="FontSize" Value="14"/>
             </Style>
             
             <Style x:Key="FabStyle" TargetType="Button">
-                <Setter Property="BackgroundColor" Value="{DynamicResource Primary}"/>
+                <Setter Property="BackgroundColor" Value="{StaticResource Primary}"/>
                 <Setter Property="TextColor" Value="White"/>
                 <Setter Property="FontSize" Value="24"/>
                 <Setter Property="WidthRequest" Value="56"/>
                 <Setter Property="HeightRequest" Value="56"/>
                 <Setter Property="CornerRadius" Value="28"/>
+            </Style>
+            
+            <!-- Input Entry Style - dark text on light background -->
+            <Style x:Key="InputEntryStyle" TargetType="Entry">
+                <Setter Property="TextColor" Value="Black"/>
+                <Setter Property="PlaceholderColor" Value="Gray"/>
+                <Setter Property="BackgroundColor" Value="White"/>
             </Style>
         </ResourceDictionary>
     </Application.Resources>
