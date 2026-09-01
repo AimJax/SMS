@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SocialMediaSimulator.Server.Application.Models;
 using SocialMediaSimulator.Server.Domain.Entities;
 using SocialMediaSimulator.Server.Infrastructure.Persistence;
+using SocialMediaSimulator.Server.Application.Services;
 
 namespace SocialMediaSimulator.Server.Application.Services;
 
@@ -12,19 +13,22 @@ public class NpcBehaviorService : INpcBehaviorService
     private readonly IContentGeneratorService _contentGenerator;
     private readonly ISocialGraphService _socialGraph;
     private readonly INpcSocialGraphService _npcSocialGraph;
+    private readonly ICommunityService? _communityService;
 
     public NpcBehaviorService(
         AppDbContext context,
         IContentRelevanceService relevanceService,
         IContentGeneratorService contentGenerator,
         ISocialGraphService socialGraph,
-        INpcSocialGraphService npcSocialGraph)
+        INpcSocialGraphService npcSocialGraph,
+        ICommunityService? communityService = null)
     {
         _context = context;
         _relevanceService = relevanceService;
         _contentGenerator = contentGenerator;
         _socialGraph = socialGraph;
         _npcSocialGraph = npcSocialGraph;
+        _communityService = communityService;
     }
 
     /// <inheritdoc />
@@ -99,6 +103,11 @@ public class NpcBehaviorService : INpcBehaviorService
         var npcAccountId = npc.AccountId;
         var interests = npc.Interests.ToList();
         var accountType = npc.Account?.AccountType ?? AccountType.OrdinaryUser;
+        
+        // Create random for determinism
+        var random = config.RandomSeed.HasValue
+            ? new Random(config.RandomSeed.Value + npcAccountId)
+            : new Random();
 
         // Always add browse/viewfeed as idle option
         candidates.Add(new NpcActionCandidate
@@ -239,6 +248,13 @@ public class NpcBehaviorService : INpcBehaviorService
                 Reason = "Create new post",
                 GeneratedContent = _contentGenerator.GeneratePostContent(npc, new Random())
             });
+        }
+
+        // Generate community-related candidates (for Tier 1-2 NPCs if enabled)
+        if (config.EnableCommunityBehavior && 
+            (accountType == AccountType.Creator || accountType == AccountType.Influencer || accountType == AccountType.OrdinaryUser))
+        {
+            await AddCommunityCandidatesAsync(npc, candidates, config, random);
         }
 
         return candidates;
@@ -612,17 +628,63 @@ public class NpcBehaviorService : INpcBehaviorService
                 case NpcActionType.CreatePost:
                     if (!string.IsNullOrEmpty(candidate.GeneratedContent))
                     {
-                        await _context.Posts.AddAsync(new Post
+                        var post = new Post
                         {
                             AuthorAccountId = npcAccountId,
+                            CommunityId = candidate.TargetCommunityId, // Can be null for personal posts
                             Content = candidate.GeneratedContent,
                             Status = PostStatus.Active,
                             CreatedAt = now,
                             UpdatedAt = now
-                        });
+                        };
+                        await _context.Posts.AddAsync(post);
+                        
+                        // Update community post count if posting to community
+                        if (candidate.TargetCommunityId.HasValue)
+                        {
+                            var community = await _context.Communities.FindAsync(candidate.TargetCommunityId.Value);
+                            if (community != null)
+                            {
+                                community.PostCount++;
+                                community.UpdatedAt = now;
+                            }
+                        }
+                        
                         await _context.SaveChangesAsync();
                         actionId = await RecordActionAsync(npcProfileId, NpcActionType.CreatePost,
                             content: candidate.GeneratedContent, executed: true);
+                    }
+                    break;
+
+                case NpcActionType.JoinCommunity:
+                    if (candidate.TargetCommunityId.HasValue && _communityService != null)
+                    {
+                        var community = await _context.Communities.FindAsync(candidate.TargetCommunityId.Value);
+                        if (community != null)
+                        {
+                            var membership = await _communityService.JoinCommunityAsync(npcAccountId, community.Slug);
+                            if (membership != null)
+                            {
+                                actionId = await RecordActionAsync(npcProfileId, NpcActionType.JoinCommunity,
+                                    targetAccountId: candidate.TargetCommunityId, executed: true);
+                            }
+                        }
+                    }
+                    break;
+
+                case NpcActionType.LeaveCommunity:
+                    if (candidate.TargetCommunityId.HasValue && _communityService != null)
+                    {
+                        var community = await _context.Communities.FindAsync(candidate.TargetCommunityId.Value);
+                        if (community != null)
+                        {
+                            var success = await _communityService.LeaveCommunityAsync(npcAccountId, community.Slug);
+                            if (success)
+                            {
+                                actionId = await RecordActionAsync(npcProfileId, NpcActionType.LeaveCommunity,
+                                    targetAccountId: candidate.TargetCommunityId, executed: true);
+                            }
+                        }
                     }
                     break;
 
@@ -686,5 +748,75 @@ public class NpcBehaviorService : INpcBehaviorService
         await _context.SaveChangesAsync();
         
         return npcAction.Id;
+    }
+    
+    /// <summary>
+    /// Add community-related action candidates
+    /// </summary>
+    private async Task AddCommunityCandidatesAsync(
+        NpcProfile npc, 
+        List<NpcActionCandidate> candidates, 
+        NpcBehaviorConfig config,
+        Random random)
+    {
+        if (_communityService == null)
+        {
+            return;
+        }
+        
+        var npcAccountId = npc.AccountId;
+        var interests = npc.Interests.Select(i => i.InterestKey ?? "").ToList();
+        
+        // Get relevant communities based on NPC interests
+        var relevantCommunities = await _communityService.GetRelevantCommunitiesForNpcAsync(interests, config.MaxRelevantCommunities);
+        
+        foreach (var community in relevantCommunities)
+        {
+            // Check if already a member
+            var isMember = await _communityService.IsMemberAsync(npcAccountId, community.Id);
+            
+            if (!isMember)
+            {
+                // Consider joining this community
+                // Probability based on interest match (handled by scoring)
+                candidates.Add(new NpcActionCandidate
+                {
+                    ActionType = NpcActionType.JoinCommunity,
+                    TargetCommunityId = community.Id,
+                    BaseScore = 0.25, // Base score, will be modified by personality
+                    Reason = $"Join community {community.Name} matching interests"
+                });
+            }
+        }
+        
+        // Consider posting in joined communities
+        var joinedCommunities = await _context.CommunityMemberships
+            .Where(m => m.AccountId == npcAccountId && m.IsActive && m.Role != CommunityRole.Owner)
+            .Select(m => m.CommunityId)
+            .Take(config.MaxRelevantCommunities)
+            .ToListAsync();
+        
+        if (joinedCommunities.Any())
+        {
+            // Get personality for community participation tendency
+            var personality = npc.Personality ?? new NpcPersonality();
+            
+            // Community participation probability based on Extraversion and Openness
+            var communityParticipationScore = personality.Extraversion * 0.5 + personality.Openness * 0.3;
+            
+            // If likely to participate in communities, consider posting in one
+            if (communityParticipationScore > 0.3 && random.NextDouble() < communityParticipationScore)
+            {
+                var randomCommunityId = joinedCommunities[random.Next(joinedCommunities.Count)];
+                candidates.Add(new NpcActionCandidate
+                {
+                    ActionType = NpcActionType.CreatePost,
+                    TargetCommunityId = randomCommunityId,
+                    BaseScore = GetPostingProbability(npc.Account?.AccountType ?? AccountType.OrdinaryUser) * 0.8,
+                    Reason = "Post in joined community",
+                    GeneratedContent = _contentGenerator.GeneratePostContent(npc, random)
+                });
+            }
+        }
     }
 }

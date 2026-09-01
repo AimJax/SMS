@@ -27,6 +27,11 @@ public class Post
     public int AuthorAccountId { get; set; }
     
     /// <summary>
+    /// The community this post belongs to (null for personal posts)
+    /// </summary>
+    public int? CommunityId { get; set; }
+    
+    /// <summary>
     /// The content of the post
     /// </summary>
     public string Content { get; set; } = string.Empty;
@@ -48,6 +53,7 @@ public class Post
     
     // Navigation properties
     public Account? AuthorAccount { get; set; }
+    public Community? Community { get; set; }
     public ICollection<PostLike> Likes { get; set; } = new List<PostLike>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

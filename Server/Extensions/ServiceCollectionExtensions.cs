@@ -31,6 +31,10 @@ public static class ServiceCollectionExtensions
         // Register notification service
         services.AddScoped<INotificationService, NotificationService>();
         
+        // Register community service
+        services.AddScoped<ICommunityService, CommunityService>();
+        services.AddScoped<ICommunitySeedService, CommunitySeedService>();
+        
         // Register NPC services
         services.AddScoped<INpcService, NpcService>();
         services.AddScoped<INpcSimulationService, NpcSimulationService>();
@@ -71,7 +75,10 @@ public static class ServiceCollectionExtensions
             RecentPostsHours = 24,
             MaxFollowingBeforeUnfollow = 200,
             EnableExploration = true,
-            ExplorationRate = 0.3
+            ExplorationRate = 0.3,
+            EnableCommunityBehavior = true,
+            MaxCommunityJoinsPerTick = 1,
+            MaxRelevantCommunities = 10
         });
 
         // Register simulation configuration

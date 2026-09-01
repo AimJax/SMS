@@ -69,4 +69,19 @@ public class NpcBehaviorConfig
     /// Exploration rate (0.0 - 1.0)
     /// </summary>
     public double ExplorationRate { get; set; } = 0.3;
+    
+    /// <summary>
+    /// Whether to enable community-related behavior
+    /// </summary>
+    public bool EnableCommunityBehavior { get; set; } = true;
+    
+    /// <summary>
+    /// Maximum communities to consider joining per tick
+    /// </summary>
+    public int MaxCommunityJoinsPerTick { get; set; } = 1;
+    
+    /// <summary>
+    /// Maximum relevant communities to consider
+    /// </summary>
+    public int MaxRelevantCommunities { get; set; } = 10;
 }

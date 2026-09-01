@@ -84,5 +84,6 @@ app.MapFeedEndpoints();
 app.MapSimulationEndpoints();
 app.MapAiEndpoints();
 app.MapNotificationEndpoints();
+app.MapCommunityEndpoints();
 
 app.Run();

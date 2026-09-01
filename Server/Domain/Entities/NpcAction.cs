@@ -16,7 +16,9 @@ public enum NpcActionType
     Block = 8,
     CreatePost = 9,
     ViewFeed = 10,
-    Search = 11
+    Search = 11,
+    JoinCommunity = 12,
+    LeaveCommunity = 13
 }
 
 /// <summary>

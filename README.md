@@ -25,8 +25,9 @@
 | 12 | NPC Social Graph | COMPLETE |
 | 13 | AI Content Generation | COMPLETE |
 | 14 | Notifications System | COMPLETE |
+| 15 | Communities | COMPLETE |
 
-**NEXT: PART 15 — [To be determined]**
+**NEXT: PART 16 — [To be determined]**
 
 ## Architecture
 
@@ -54,7 +55,7 @@ Server/
 ├── Application/
 │   └── Services/         Business logic (AccountService, JwtService, SocialGraphService, PostService, FeedService)
 ├── Domain/
-│   └── Entities/         Account, Profile, Follow, Block, Mute, AccountHistory, Post, PostLike, Comment
+│   └── Entities/         Account, Profile, Follow, Block, Mute, AccountHistory, Post, PostLike, Comment, Community, CommunityMembership, NpcProfile, NpcAction
 ├── Infrastructure/
 │   └── Persistence/      EF Core DbContext, Entity configurations, Migrations
 ├── Contracts/
@@ -236,6 +237,32 @@ The feed is generated server-side using `IFeedService`:
 - Excludes soft-deleted posts
 - Ordered by newest first
 - Cursor-based pagination for scalability
+
+### Communities
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/communities` | GET | No | Browse public communities |
+| `/api/communities/search` | GET | No | Search communities by name/tags |
+| `/api/communities/by-topic/{topic}` | GET | No | Get communities by topic |
+| `/api/communities/{slug}` | GET | Yes* | Get community details |
+| `/api/communities/{slug}/feed` | GET | Yes | Get community posts |
+| `/api/communities/{slug}/members` | GET | No | Get community members |
+| `/api/communities/{slug}/join` | POST | Yes | Join a community |
+| `/api/communities/{slug}/leave` | POST | Yes | Leave a community |
+| `/api/account/communities` | GET | Yes | Get user's communities |
+
+*Private communities require membership.
+
+**Community Visibility:**
+- **Public** — Visible to everyone, joinable by anyone
+- **Private** — Visible to members only
+- **Hidden** — Not listed in browse/search
+
+**Community Roles:**
+- **Owner** — Full control, cannot leave
+- **Admin** — Can manage members
+- **Moderator** — Can moderate content
+- **Member** — Basic access
 
 ## NPC Simulation Architecture
 
@@ -500,6 +527,8 @@ Schedule next simulation
 - **Unfollow** — Unfollow an account
 - **CreatePost** — Create a new post
 - **Search** — Search for content/accounts
+- **JoinCommunity** — Join a community
+- **LeaveCommunity** — Leave a community
 
 ### Behavior Configuration (NpcBehaviorConfig)
 ```csharp
@@ -517,6 +546,9 @@ public class NpcBehaviorConfig
     public int MaxFollowingBeforeUnfollow { get; set; } = 200;
     public bool EnableExploration { get; set; } = true;
     public double ExplorationRate { get; set; } = 0.3;
+    public bool EnableCommunityBehavior { get; set; } = true;
+    public int MaxCommunityJoinsPerTick { get; set; } = 1;
+    public int MaxRelevantCommunities { get; set; } = 10;
 }
 ```
 
@@ -1496,6 +1528,24 @@ $feed2 = Invoke-RestMethod "http://localhost:5225/api/feed?cursor=$cursor&pageSi
 | Notification - NPC attribution | PASS |
 | Notification - integration with SocialGraphService | PASS |
 | Notification - ownership verification | PASS |
+| Community - create community | PASS |
+| Community - get by slug | PASS |
+| Community - join community | PASS |
+| Community - duplicate join prevention | PASS |
+| Community - leave community | PASS |
+| Community - owner cannot leave | PASS |
+| Community - public communities only | PASS |
+| Community - search by name | PASS |
+| Community - search by topic | PASS |
+| Community - community feed | PASS |
+| Community - account communities | PASS |
+| Community - is member (owner) | PASS |
+| Community - NPC relevant communities | PASS |
+| Community - member role (owner) | PASS |
+| Community - member role (member) | PASS |
+| Community seed - creates communities | PASS |
+| Community seed - no duplicates | PASS |
+| Community seed - valid topics | PASS |
 
 ## License
 

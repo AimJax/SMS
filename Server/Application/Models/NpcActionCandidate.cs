@@ -28,6 +28,11 @@ public class NpcActionCandidate
     public int? TargetCommentId { get; set; }
     
     /// <summary>
+    /// Target community ID if applicable
+    /// </summary>
+    public int? TargetCommunityId { get; set; }
+    
+    /// <summary>
     /// Pre-computed base score (0.0 - 1.0)
     /// </summary>
     public double BaseScore { get; set; }
