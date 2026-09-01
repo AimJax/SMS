@@ -13,8 +13,9 @@
 | 01E | Android Client Foundation | COMPLETE |
 | 01F | Foundation Checkpoint | COMPLETE |
 | 02 | Backend Architecture | COMPLETE |
+| 03 | Persistence | COMPLETE |
 
-**NEXT: PART 03 — Persistence**
+**NEXT: PART 04 — ACCOUNTS & AUTHENTICATION**
 
 ## Architecture
 
@@ -38,17 +39,17 @@ Infrastructure (EF Core / SQLite)
 Server/
 ├── API/
 │   ├── Controllers/       API endpoints
-│   └── Middleware/        Exception handling
+│   └── Middleware/       Exception handling
 ├── Application/
-│   └── Services/          Business logic interfaces & implementations
+│   └── Services/         Business logic interfaces & implementations
 ├── Domain/
-│   └── Entities/          Domain models
+│   └── Entities/         Domain models
 ├── Infrastructure/
-│   └── Persistence/       EF Core DbContext
+│   └── Persistence/     EF Core DbContext, Entity configurations
 ├── Contracts/
-│   ├── Requests/          API request DTOs
-│   └── Responses/         API response DTOs
-├── Extensions/            DI registration extensions
+│   ├── Requests/        API request DTOs
+│   └── Responses/       API response DTOs
+├── Extensions/           DI registration extensions
 └── Program.cs
 ```
 
@@ -59,7 +60,7 @@ Server/
 | **API** | HTTP routing, request handling, error responses |
 | **Application** | Business logic orchestration, service interfaces |
 | **Domain** | Entity definitions, domain rules |
-| **Infrastructure** | Database access, external services |
+| **Infrastructure** | Database access, EF Core configurations |
 | **Contracts** | API request/response DTOs |
 
 ## Technology Stack
@@ -78,11 +79,11 @@ Server/
 │   └── Services/         API services (ApiService)
 ├── Server/               ASP.NET Core backend
 │   ├── API/              Controllers, middleware
-│   ├── Application/      Service interfaces & implementations
+│   ├── Application/       Service interfaces & implementations
 │   ├── Domain/           Entity definitions
-│   ├── Infrastructure/   Persistence (EF Core)
+│   ├── Infrastructure/    Persistence (EF Core, Entity configurations)
 │   ├── Contracts/        Request/response DTOs
-│   └── Extensions/       DI registration
+│   └── Extensions/        DI registration
 ├── Shared/               Shared contracts and models
 ├── Database/             Database files (sms.db)
 ├── Tests/               Automated tests
@@ -90,6 +91,32 @@ Server/
 ├── .gitignore
 ├── README.md
 └── SocialMediaSimulator.slnx
+```
+
+## Persistence Architecture
+
+### SQLite Configuration
+- **WAL Mode:** Enabled (Write-Ahead Logging for concurrency)
+- **Foreign Keys:** Enabled
+- **Busy Timeout:** 5 seconds
+- **Synchronous:** NORMAL
+
+### Entity Framework Core
+- **DbContext:** `AppDbContext`
+- **Connection:** Configured via `appsettings.json`
+- **Entity Configuration:** Separate configuration classes per entity
+
+### Unit of Work
+- **Interface:** `IUnitOfWork`
+- **Implementation:** `UnitOfWork`
+- **Purpose:** Transaction management for multi-entity operations
+
+### Current Database Schema
+```
+PersistenceTests
+├── Id (INTEGER, PK, AUTOINCREMENT)
+├── Value (TEXT, NOT NULL, max 500)
+└── CreatedAt (TEXT, NOT NULL, indexed)
 ```
 
 ## Current Implementation
@@ -167,6 +194,8 @@ Invoke-RestMethod http://localhost:5225/api/health
 | Persistence endpoint (POST) | PASS |
 | Persistence endpoint (GET) | PASS |
 | Persistence after restart | PASS |
+| WAL mode | PASS |
+| All data preserved | PASS |
 | Exception middleware | PASS |
 | DI service resolution | PASS |
 

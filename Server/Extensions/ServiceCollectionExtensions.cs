@@ -19,8 +19,17 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(connectionString));
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+        {
+            options.UseSqlite(connectionString, sqliteOptions =>
+            {
+                // Enable command timeout for longer operations
+                sqliteOptions.CommandTimeout(30);
+            });
+        });
+
+        // Register Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
