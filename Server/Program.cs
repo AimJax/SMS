@@ -5,6 +5,7 @@ using SocialMediaSimulator.Server.API.Controllers;
 using SocialMediaSimulator.Server.API.Middleware;
 using SocialMediaSimulator.Server.Extensions;
 using SocialMediaSimulator.Server.Infrastructure.Persistence;
+using SocialMediaSimulator.Server.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,5 +78,6 @@ app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 app.MapPersistenceTestEndpoints();
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
+app.MapGraphEndpoints();
 
 app.Run();

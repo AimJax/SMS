@@ -15,8 +15,9 @@
 | 02 | Backend Architecture | COMPLETE |
 | 03 | Persistence | COMPLETE |
 | 04 | Accounts & Authentication | COMPLETE |
+| 05 | Social Graph | COMPLETE |
 
-**NEXT: PART 05 — SOCIAL GRAPH**
+**NEXT: PART 06 — POSTS & ENGAGEMENT**
 
 ## Architecture
 
@@ -39,12 +40,12 @@ Infrastructure (EF Core / SQLite)
 ```
 Server/
 ├── API/
-│   ├── Controllers/       API endpoints (Auth, Account, PersistenceTest)
+│   ├── Controllers/       API endpoints (Auth, Account, Graph)
 │   └── Middleware/       Exception handling
 ├── Application/
-│   └── Services/         Business logic (AccountService, JwtService, etc.)
+│   └── Services/         Business logic (AccountService, JwtService, SocialGraphService)
 ├── Domain/
-│   └── Entities/         Account, Profile, AccountHistory, PersistenceTest
+│   └── Entities/         Account, Profile, Follow, Block, Mute, AccountHistory
 ├── Infrastructure/
 │   └── Persistence/      EF Core DbContext, Entity configurations, Migrations
 ├── Contracts/
@@ -76,6 +77,36 @@ Server/
 - Event types: Created, UsernameChanged, DisplayNameChanged, etc.
 - Never deleted
 
+## Social Graph
+
+### Follow Model
+- **FollowerAccountId** — The account following
+- **FollowedAccountId** — The account being followed
+- **CreatedAt** — When follow occurred
+- Unique constraint prevents duplicate follows
+- Self-follow not allowed
+
+### Block Model
+- **BlockerAccountId** — The account blocking
+- **BlockedAccountId** — The account blocked
+- **CreatedAt** — When block occurred
+- Blocks remove conflicting follow relationships (transactional)
+- Blocked accounts cannot follow the blocker
+
+### Mute Model
+- **MuterAccountId** — The account muting
+- **MutedAccountId** — The account muted
+- **CreatedAt** — When mute occurred
+- Muting does NOT remove follow relationships
+- Separate from blocking
+
+### Blocking Behavior
+When Account A blocks Account B:
+1. Any follow A→B is removed
+2. Any follow B→A is removed
+3. B cannot follow A while blocked
+4. B cannot unblock A (only A can)
+
 ## Authentication
 
 - **JWT Bearer Tokens** — 7-day expiration
@@ -96,11 +127,51 @@ Server/
 | `/api/account/me` | GET | Yes | Get authenticated account |
 | `/api/account/{accountId}` | GET | Yes | Get public profile |
 
+### Social Graph
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/accounts/{id}/follow` | POST | Yes | Follow account |
+| `/api/accounts/{id}/follow` | DELETE | Yes | Unfollow account |
+| `/api/accounts/{id}/followers` | GET | No | Get followers (paginated) |
+| `/api/accounts/{id}/following` | GET | No | Get following (paginated) |
+| `/api/accounts/{id}/block` | POST | Yes | Block account |
+| `/api/accounts/{id}/block` | DELETE | Yes | Unblock account |
+| `/api/accounts/{id}/mute` | POST | Yes | Mute account |
+| `/api/accounts/{id}/mute` | DELETE | Yes | Unmute account |
+| `/api/accounts/{id}/relationship` | GET | Yes | Get relationship status |
+
 ### Persistence Test
 | Endpoint | Method | Auth | Description |
 |----------|--------|------|-------------|
 | `/api/health` | GET | No | Health check |
 | `/api/persistence-test` | POST/GET | No | Persistence test endpoints |
+
+### Pagination
+Followers and following endpoints support pagination:
+```
+/api/accounts/{id}/followers?page=1
+/api/accounts/{id}/following?page=1
+```
+
+Response includes:
+- `accounts` — Array of account summaries
+- `page` — Current page
+- `pageSize` — Items per page (default 20)
+- `totalCount` — Total items
+- `totalPages` — Total pages
+
+### Relationship Response
+```json
+{
+  "accountId": "guid",
+  "isFollowing": true,
+  "isFollowedBy": false,
+  "isMutual": false,
+  "isBlocking": false,
+  "isBlockedBy": false,
+  "isMuting": false
+}
+```
 
 ## Technology Stack
 
@@ -143,6 +214,33 @@ Server/
 | EventType | INTEGER | enum |
 | Details | TEXT | max 1000, nullable |
 | CreatedAt | TEXT | datetime |
+
+### Follows
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| FollowerAccountId | INTEGER | FK → Accounts |
+| FollowedAccountId | INTEGER | FK → Accounts |
+| CreatedAt | TEXT | datetime |
+| **UNIQUE** | | (FollowerAccountId, FollowedAccountId) |
+
+### Blocks
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| BlockerAccountId | INTEGER | FK → Accounts |
+| BlockedAccountId | INTEGER | FK → Accounts |
+| CreatedAt | TEXT | datetime |
+| **UNIQUE** | | (BlockerAccountId, BlockedAccountId) |
+
+### Mutes
+| Column | Type | Constraints |
+|--------|------|-------------|
+| Id | INTEGER | PK, AUTOINCREMENT |
+| MuterAccountId | INTEGER | FK → Accounts |
+| MutedAccountId | INTEGER | FK → Accounts |
+| CreatedAt | TEXT | datetime |
+| **UNIQUE** | | (MuterAccountId, MutedAccountId) |
 
 ### PersistenceTests
 | Column | Type | Constraints |
@@ -195,6 +293,15 @@ Invoke-RestMethod http://localhost:5225/api/auth/register -Method POST -Body (@{
 Invoke-RestMethod http://localhost:5225/api/auth/login -Method POST -Body (@{username="test";password="Password123!"} | ConvertTo-Json) -ContentType "application/json"
 ```
 
+### Test Follow
+
+```powershell
+# After login, use token to follow
+$token = "your-jwt-token"
+$targetId = "target-account-guid"
+Invoke-RestMethod "http://localhost:5225/api/accounts/$targetId/follow" -Method POST -Headers @{"Authorization"="Bearer $token"}
+```
+
 ## Verification Results
 
 | Test | Result |
@@ -206,6 +313,21 @@ Invoke-RestMethod http://localhost:5225/api/auth/login -Method POST -Body (@{use
 | Duplicate username rejection | PASS |
 | Authenticated /me endpoint | PASS |
 | Account persistence (restart) | PASS |
+| Follow account | PASS |
+| Unfollow account | PASS |
+| Get followers (paginated) | PASS |
+| Get following (paginated) | PASS |
+| Mutual follow detection | PASS |
+| Self-follow rejection | PASS |
+| Block account | PASS |
+| Block removes conflicting follows | PASS |
+| Blocked user cannot follow | PASS |
+| Unblock account | PASS |
+| Mute account | PASS |
+| Mute does NOT remove follow | PASS |
+| Unmute account | PASS |
+| Relationship query | PASS |
+| Graph persistence (restart) | PASS |
 | Database schema | PASS |
 
 ## License

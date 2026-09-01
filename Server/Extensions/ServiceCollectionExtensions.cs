@@ -16,6 +16,9 @@ public static class ServiceCollectionExtensions
         
         // Register JWT service
         services.AddSingleton<IJwtService, JwtService>();
+        
+        // Register social graph service
+        services.AddScoped<ISocialGraphService, SocialGraphService>();
 
         return services;
     }
