@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using SocialMediaSimulator.Client.Services;
 using SocialMediaSimulator.Client.Views;
 using SocialMediaSimulator.Client.Configuration;
@@ -26,8 +27,16 @@ public partial class App : Application
 
     static void ConfigureServices(IServiceCollection services)
     {
+        // Register AppConfig
         services.AddSingleton(new AppConfig());
-        services.AddSingleton<ApiService>();
+        
+        // Register HttpClient for ApiService
+        services.AddHttpClient<ApiService>((sp, client) =>
+        {
+            var config = sp.GetRequiredService<AppConfig>();
+            client.BaseAddress = new Uri(config.ApiBaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
